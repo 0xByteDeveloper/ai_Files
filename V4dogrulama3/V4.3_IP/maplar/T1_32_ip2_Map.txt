@@ -1,0 +1,18 @@
+# MazeMap - i4M MazeProtector V4.3-IP (in-place sifreleme)
+# MODE: IP2 Stream-IP: govde YERINDE sifreli; her cagrida yerinde cozulur, donuste YENI rastgele anahtarla yeniden sifrelenir
+# Format: FUNC <isim> <fnRva> <fnSize> <cbRva> <proxyRva> <handlerRva> <seedHex> <method>
+# RVA'lar ImageBase'e gore. Cheat Engine: modulBase + RVA
+FUNC FnvHash1a 4096 63 32768 32976 32986 AE5BA1F1 2
+IPINFO headLen=5 bodyLen=58 blobRva=0x8000 blobSize=656 retsRva=0x820C crc=812F6CA5 state=depth0/lock0/enc
+WARN Govde section'i yazilabilir yapildi (in-place decrypt)
+FUNC LcgNext 4160 31 36864 37072 37087 4E354AF2 2
+IPINFO headLen=10 bodyLen=21 blobRva=0x9000 blobSize=661 retsRva=0x9211 crc=EADE7153 state=depth0/lock0/enc
+FUNC XorCipher 4192 59 40960 41168 41178 5F6BDCE7 2
+IPINFO headLen=5 bodyLen=54 blobRva=0xA000 blobSize=656 retsRva=0xA20C crc=D9B12933 state=depth0/lock0/enc
+FUNC ChecksumBlock 4256 230 45056 45264 45276 8182D29E 2
+IPINFO headLen=7 bodyLen=223 blobRva=0xB000 blobSize=658 retsRva=0xB20E crc=8682738E state=depth0/lock0/enc
+FUNC MergeHash 4496 108 49152 49360 49371 BB10B0BB 2
+IPINFO headLen=6 bodyLen=102 blobRva=0xC000 blobSize=657 retsRva=0xC20D crc=0CB537D7 state=depth0/lock0/enc
+FUNC ClampAdd 4608 39 53248 53456 53469 1269DF1A 2
+IPINFO headLen=8 bodyLen=31 blobRva=0xD000 blobSize=659 retsRva=0xD20F crc=4A675452 state=depth0/lock0/enc
+# TOPLAM: 6 fonksiyon korundu (IP2), 0 atlandi

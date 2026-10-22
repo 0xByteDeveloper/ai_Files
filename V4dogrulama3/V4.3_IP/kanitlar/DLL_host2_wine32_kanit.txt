@@ -1,0 +1,31 @@
+=== T3-DLL TESTI v3 (MazeProtector IP, uc DLL) ===
+[1/4] ORIJINAL DLL testi
+DLL1: YUKLENDI base==10000000
+EXPORT=00000004
+MOVEH=D0D78AB3
+SCORE=00000000
+X=00000002
+Y=00000002
+LCG=002E1D6A
+[2/4] KORUMALI DLL testi (IP1: yerinde sifreli, sabit anahtar)
+DLL2: YUKLENDI base==62000000
+EXPORT=00000004
+MOVEH=D0D78AB3
+SCORE=00000000
+X=00000002
+Y=00000002
+LCG=002E1D6A
+[3/4] KORUMALI DLL testi (IP2: her cagrida yeni rastgele anahtar)
+DLL3: YUKLENDI base==008D0000
+EXPORT=00000004
+MOVEH=D0D78AB3
+SCORE=00000000
+X=00000002
+Y=00000002
+LCG=002E1D6A
+[4/4] KARSILASTIRMA
+SONUC: ESLESME=TAM (IP1 ve IP2 DLL'leri orijinal ile birebir ayni davrandi)
+MANA: DLL yuklendi, 4 export bulundu, 2x42 cagri, sifreli
+      fonksiyonlar yerinde cozulup calisti, cokme YOK.
+
+[KAPATMAK ICIN ENTER]

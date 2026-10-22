@@ -1,0 +1,30 @@
+# wine64 x64 GERCEK CALISTIRMA KANITI (Tur-5)
+Tarih: 2026-10-23 | Ortak: sandbox x86_64 (Debian trixie) + Debian wine64 10.0 (repack-6)
+
+## Neden Kron4ek degil?
+- Kron4ek wine-11.20-amd64: multi-arch (i386+x86_64) -> 64-bit PE bile i386-preloader zincirinden
+  geciyor -> sandbox seccomp AUDIT_ARCH_I386 ABI'yi SIGSYS ile olduruyor (Bad system call).
+- Kron4ek wine-11.20-amd64-wow64: sadece x86_64 AMA 32GB'lik 32-bit adres-alani rezervasyonu
+  istiyor -> sandbox overcommit reddediyor (ENOMEM x2) -> wine NULL deref -> SIGSEGV.
+- Cozum: Debian wine64 10.0 (saf x86_64 archs, rezervasyon yok) rootless dpkg -x kurulumu.
+  Ek duzeltmeler: wineserver symlimki, share/wine/wine/nls quirk symlink'i, zlib1.dll (libz-mingw-w64).
+- Launcher: /home/z/scripts/wine64.sh
+
+## TEST SONUCLARI (GERCEK wine64, emulasyon YOK)
+1) T1_Validate.exe (baseline)          : 11/11 hash, exit=0
+   H1=71B1E1C5 L1=00EEB4C8 L2=004CF3D5 H2=CFE64847 H3=71B1E1C5
+   C1=3EB90716 M1=A71E2653 K1=0000001C K2=00000001 HITS=00000005 SEED=C16436A3
+2) T1_x64_ip1.exe  (6 fonksiyon IP1)   : 11/11 hash BIREBIR AYNI, exit=0
+3) T1_x64_ip2.exe  (6 fonksiyon IP2)   : 11/11 hash BIREBIR AYNI, exit=0
+4) TinySnake.x64.unpack.exe (baseline) : oyun ekranini cizdi, 8sn cokmedi (exit=124 timeout-kill)
+5) TinySnake.x64.protected.IP1.exe     : oyun ekranini cizdi, 8sn cokmedi, cikti baseline ile
+                                         BIREBIR AYNI (diff=bos, 96116 bayt = 96116 bayt)
+6) A/B - TinySnake.x64.protected.v42   : "Unhandled page fault on execute access to
+   TinySnake.x64.protected.tektek        0000700000401090" -> slot bolgesinde execute fault,
+   TinySnake.x64.protected.exe           6/6 denemede deterministik CRASH (exit=5)
+
+## SONUC
+- IP1/IP2 motoru x64'te GERCEK calisma ortaminda kanitlandi (unicorn emulasyon artik tek kanit degil).
+- Eski maze-makinesi varyantlarinin crash'i (kullanicinin "bazen cokuyor / oyun gorunmuyor" raporu)
+  wine64'te de BIREBIR yeniden uretildi: slot execute fault. Fonksiyon seciminden DEGIL,
+  makine mimarisinden (komut tasima + slot) kaynakli. IP1'de komut tasimadigi icin bu hata YOK.

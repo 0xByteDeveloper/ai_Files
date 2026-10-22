@@ -1,0 +1,4 @@
+wine: Unhandled page fault on execute access to 0000700000401090 at address 0000700000401090 (thread 0158), starting debugger...
+0160:err:module:import_dll Library zlib1.dll (which is needed by L"C:\\windows\\system32\\dbghelp.dll") not found
+0160:err:module:import_dll Library dbghelp.dll (which is needed by L"C:\\windows\\system32\\winedbg.exe") not found
+0160:err:module:loader_init Importing dlls for L"C:\\windows\\system32\\winedbg.exe" failed, status c0000135
