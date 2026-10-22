@@ -1,0 +1,170 @@
+====================================================================================================
+V4 GUVENLIK RAPORU - TekTek (V4method1) + STREAM god-tier (V4method2)
+MovePlayer: RVA 0x1C40, 92 bayt, 10 parca, 12 site, 11 thunk | Motor: MazeProtector.h (MP_STREAM/MP_TEKTEK)
+====================================================================================================
+
+0) SON DURUM OZETI (tum testler Unicorn ile, MP_ONLY=MovePlayer)
+   NOT: EXE'ler GUNCEL motor (duzeltme 2: tabanli CRC-8) ile yeniden derlendi ve TUM
+   senaryolar/kani tlar o EXE'ler uzerinden yeniden olculdu (eski EXE bug'li 1-tur CRC
+   dongusu tasiyordu - bug kaydi 10).
+----------------------------------------------------------------------------------------------------
+SENARYO                        V4method1 TEKTEK          V4method2 STREAM          SIFRESIZ (referans)
+----------------------------------------------------------------------------------------------------
+Tam oyun (arena modu)          score=30 frame=529        score=30 frame=529        score=30 frame=529
+                               WON=1 exit=0              WON=1 exit=0              WON=1 exit=0
+Fallback (8 VirtualAlloc      score=30 frame=529        score=30 frame=529        -
+ basarisiz -> YERINDE mod)     WON=1 exit=0              WON=1 exit=0
+G2 anti-patch (1 sifreli      -                         exit=222 (0xDE)
+ bayt cevirildi)                                         FAIL-CLOSED PASS
+Baseline ile birebir esitlik   EVET                      EVET                      -
+
+Iki yontem de baseline ile KOMUT-KOMUT ayni davraniyor (ayni skor, ayni frame, ayni hwid).
+
+1) V4method1 - TEK TEK (kullanicinin fikrinin duz hali)
+----------------------------------------------------------------------------------------------------
+Fikir: "parcalari TEK yere tek tek yaz, yeni parca yazilirken oncekini SIL". Wipe-behind olmadan
+op0+op1+...+op28 birikir ve yine tam fonksiyon arenda'da bitisik olusurdu (kullanicinin kendi
+yakaladigi tuzak) - wipe-behind bu birikimi kirar.
+
+Motor gercegi (ArenaV4_TekTek):
+ - VirtualAlloc 4096B RWX sayfa (her cagri) -> template kopyala (stage + cleanup bloklari)
+ - 32B slot (sabit adres, G1 kapali) -> WIPE 32B -> parca decrypt (XOR K, 8B blok)
+ -> delta-fixup (rel32 disp -= slot - (blobBase+encOff)) -> jmp slot
+ - Kenarlar: .maze'de 9B plaintext thunk (mov r10d,<pid>; jmp conv) - 10 parca + 1 cleanup
+ - ret -> E9 cleanup-thunk -> farewell (.maze plaintext): VirtualFree + ret
+ - Fallback: VirtualAlloc 8 deneme basarisiz -> YERINDE stream (decrypt-once flagi, .maze'de kosar)
+ - Ozellikler: her an arenada MAX 1 parca plaintext (24B); tam fonksiyon HICBIR an bitisik var olmaz
+ - Guvenlik katmanlari G1/G2/G3 KAPALI (düz fikir); lazy cold-path YINE BEDAVA (asagida)
+
+2) V4method2 - STREAM god-tier (MP_STREAM=1)
+----------------------------------------------------------------------------------------------------
+TekTek'in uzerine 3 katman:
+
+ G1 SLOT RASTGELELESTIRME (bedava): stub her cagri rdtsc ile slot = slotBase + (rand&0x3F)*16
+    secer. KANIT: tam oyunda 64 benzersiz slot adresi gozlendi (0x3D0..0x7C0, 16B adimlar).
+    Ayni parca her cagride baska adreste -> "dump al, sonraki cagriyla esle" (replay) olur.
+
+ G2 CRC-8 ANTI-PATCH (tabanli, .maze'de 256B jenerik plaintext tablo): her parca decrypt
+    edilince slot uzerinden CRC-8 (poly 0x07) hesaplanir, blk tablosundaki beklenen degerle
+    karsilastirilir. Eslesmezse: stage frame'i sarilir -> arena VirtualFree -> ExitProcess(0xDE).
+    FAIL-CLOSED: yamali parca ASLA calistirilmaz, surec bilincli sonlandirilir.
+    KANIT: sifreli span'in tek bir bayti cevrildi -> exit=222 (0xDE) PASS.
+    Not: tablo jenerik sabittir (her derleyicinin CRC tablosu gibi) - kod sizdirmaz.
+
+ G3 DECOY ENJEKSIYONU: stage basinda rdtsc tabanli %25 ihtimalle slot'a 16-24B rastgele
+    "yem parca" cozulur, sonra WIPE ile izi silinir ve gercek parca gelir. Tek-adim izleyene
+    (CE tracer) gurultu: her stage'de baska bir "parca" gorunur, hangisi gercek ayirt edilemez
+    (gercek parca CRC'li, decoysuz - ama izleyici CRC'yi gormez).
+
+3) BEDAVA KAZANIM - LAZY COLD-PATH DECRYPT (iki yontemde de var)
+----------------------------------------------------------------------------------------------------
+Duvar VARSA piece6'daki jne ALINIR -> akis thunk(9)'a (epilog) gider -> piece7/piece8 (px/ny
+yazimi) o cagri icin HIC decrypt edilmez. V3'te 248 baytin TAMAMI her cagri cozuluyordu.
+
+KANIT (duvar-var yolu, IsWall zorla 1 döndurulerek 20000 cagri):
+    cozulen parca stage sayilari: {0..6, 9} x 20000, pid7=0, pid8=0
+    -> c8/c9 fiziksel olarak HIC cozulmedi (jne alindi, o yol hic materialize edilmedi)
+Duvar-YOK yolu (normal BFS akisi, 529 cagri): 10 parcanin HEPSI 529'er kez cozuldu (min=max).
+
+4) GUVENLIK KARSILASTIRMASI (gercek sayilar)
+----------------------------------------------------------------------------------------------------
+Metrik                              V3 ARENA         V4 TEKTEK        V4 STREAM
+----------------------------------------------------------------------------------------------------
+Her an bitisik plaintext            248B (tam fn)    max 24B (1 prc)  max 24B (1 prc)
+Cozulen toplam / cagri (duvar-yok)  248B             ~228B (8.5 prc)  ~228B + decoy gurultu
+Cozulen / cagri (duvar-var)         248B             ~215B (c8 yok)   ~215B (c8 yok)
+Arena boyutu                        1113B            4096B sayfa*     4096B sayfa*
+Slot adres cesitliligi              arena taban      sabit            64 konum/cagri (G1)
+Anti-patch                          yok              yok              CRC-8 fail-closed (0xDE)
+Decoy gurultusu                     7 statik yem     yok              %25 runtime decoy
+Dump -> tam fonksiyon               1 dump YETER     eksik parcalar   eksik + adres kaymasi
+Statik .maze                        sifreli          sifreli          sifreli (+jenerik tablo)
+Calisma maliyeti / cagri            1 kopya+3 fix    ~11 stage        ~11 stage + %25 decoy + CRC
+        * 4096B = VirtualAlloc granularligi; slot kendisi 32B, kalan sayfa bos (V3'te 1113B
+          kullanilirdi - fark istatistiksel degil, saldiri yuzeyi slot'un kendisi).
+
+Kalan risk (durus): CPU komutlari eninde sonunda arena'da/slot'ta calistirir; tek-adim izleyen
+(CE trace) komutlari teker teker gorur. Bu TAMAMEN engellenemez (kod calismak zorunda). V4'un
+kazanci: (1) tek dump ile tam fonksiyonu imkansiz kilma, (2) replay'i G1 ile kirma, (3) yamayi
+G2 ile fail-closed kapama, (4) izleme gurultusunu G3 ile artirma. Ilac istenirse G5/G6 (asagida).
+
+5) G5 - TF/VEH GERCEK KOMUT-KOMUT (mega-protector seviyesi) - MALIYET ANALIZI
+----------------------------------------------------------------------------------------------------
+Yontem: her komuttan once TF set -> komut calisir -> #DB (single-step exception) -> VEH handler
+siradaki komutu decrypt eder, oncekini siler. Kod asla 2 komutluk plaintext block icermez.
+
+Maliyet (MovePlayer, 92 bayt / ~29 komut / 10 parca uzerinden):
+ - Her komut: TF set (pushfq/or/popfq ~3 komut) + exception dispatch
+ - Windows'ta bir user-mode exception: KiUserExceptionDispatcher -> RtlDispatchException ->
+   VEH zinciri taramasi -> handler -> NtContinue: ~5.000-15.000 dongu / komut (kernel transition
+   dahil ~10k+; KPTI aktifken daha kotu)
+ - 29 komut x ~10k = ~300.000 dongu / MovePlayer cagri  (V4 STREAM ~+3.000'e karsi: ~100x)
+ - Tus basimi basina 2 cagri: ~600k dongu/tus - insan algisi icin hala "0ms" (~0.2ms@3GHz)
+   AMA oyun dongusunde baska sicak fonksiyonlara konursa hissedilir.
+ - Manuel-map gercekligi: VEH kurulumu modul tabanli calisir; manuel-map'te modul PEB LDR
+   listesinde YOK -> RtlDispatchException overlay RVA/VA bulamaz -> ya elle RtlAddVectored-
+   ExceptionHandler cagrilir (IAT'den) ya da KiUserExceptionDispatcher patch'lenir (thread
+   yarisi riski: yeni thread'lerde patch gorulmez - her thread kontrolu gerekir).
+ - Ek risk: anti-cheat'ler TF kullanimini ve VEH zinciri kalabaligini sinyal sayar.
+KARAR: tus basimi icin GEREK YOK (V4 STREAM yeterli); cok kritik, cagri basina az kosan bir
+fonksiyon (lisans/anahtar cozme) icin AYRI mod olarak degerlendirilir.
+
+6) G6 - MINI-VM (teori katmani) - MALIYET ANALIZI
+----------------------------------------------------------------------------------------------------
+Yontem: opcod'lar native x86 olarak HIC materialize edilmez; stub icindeki kucuk yorumlayici
+(VM) sifreli IR'den (MzOp struct'lari) okuyup islemleri kayit/bellek uzerinde simule eder.
+
+Maliyet:
+ - Interpreter adimi: her IR-op ~30-80 komut (fetch-decode-execute + dispatch)
+ - x86 semantigi tamamini kapsamak: flag'ler, EFLAGS-tasiyan dallanmalar, rip-relative, string
+   komutlari, segment register'i (gs:[0x60] PEB erisimi!) -> en az 300-600 IR-op cesidi
+ - 29 komut x ~50 = ~1.500 dongu / cagri (hizli!) AMA:
+ - Dogru yazmak: partial-EFLAGS (OF/CF/AF/SF/ZF/PF) + JCC keskinlik + sub-carry tuzaklari...
+   uretim suresi V4'un ~10 kati; her hata sessiz yanlis davranis (test sirasinda yakalanmasi
+   zaten 8 bug aldi - VM'de bu 30-50 bug olur)
+ - Anti-analiz kazi: VM bytecode'i statik olarak x86 DEGIL -> disassembler cikisi anlamsiz;
+   devirtualization icin insan emegi gerekir. En guclu kazanc bu.
+ - Orta yol (pragmatik): sadece "sicak 5-10 komutluk cekirdek" IR'ye tasinir, kalan native
+   kalir -> kazanign %70'i, maliyetin %30'u.
+KARAR: ayri proje; V4 + G1-G3 pragmatik tavan. Istek olursa yalnizca cekirdek-blok VM'i planlanir.
+
+7) YAPILAN HATA DUKELERI (bu oturum - bug kayitlari)
+----------------------------------------------------------------------------------------------------
+1. mov r8d,edx yanlis kodlanmisti: 0x44 0x89 0xD0 emit ediliyordu - bu "mov eax,r10d" kodluyor
+   (REX.R=44 reg alanini genisletir). Dogrusu 0x41 0x89 0xD0 (REX.B). CRC akumulatoru hic
+   guncellenmiyordu.
+2. Runtime CRC dongusu byte basina 1 tur yapiyordu; gercek CRC-8 8 tur ister. Cozum: tabanli
+   CRC-8 (256B tablo .maze'de plaintext) - build'deki bit-serial ile birebir eslesti.
+3. Tabanli movzx'in ModRM'i 0x04 (mod=00) yazilmisti: disp32 YOK demek - disp baytlari komut
+   sanilip calistiriliyordu (add [rax],al; rax=4 -> fault). Dogrusu 0x84 (mod=10).
+4. crcFail bloku jne'nin HEMEN arkasina konmustu -> site-fixup kodu iki yoldan da ATLANIYORDU
+   (jne hedefi == fall-through!). Blok tail'den SONRA tasindi.
+5. CRC-fail erken cikisi yari kalmis prolog frame'i ile caller'a ret atiyordu -> farewell ret'i
+   cop adresi popluyor (arena+0x615 fault). Cozum: fail-closed cikis (VirtualFree + ExitProcess
+   (0xDE)) - caller'a donmek zaten imkansiz (frame kismen kurulmus).
+6. Fallback fb dongusunde "jne fin" disp'i 4 eksik hesaplaniyordu (fin - here yerine
+   fin - (here+4) olmali) -> jne je'nin ortasina dusuyor (UC_ERR_INSN_INVALID).
+7. lea conv,[rbx+fbStageOff] 0x4D (REX.B) emit ediyordu -> taban rbx degil r11 oluyordu;
+   0x4C olmali. Ek olarak EmitStreamFbStage END donduruyordu (START degil) -> conv = stage sonu
+   (Stream'de crcFarewell basi! -> fb modunda direkt 0xDE; TekTek'te zero-pad faultu).
+   + 32-bit negatif ofsetler movsxd ile 64-bit'e uzatilmali ([conv+rax] tam rax kullanir).
+8. fbStage caller rax'ini korumuyordu (parcalar rax ile haberisir: ny yazimi cop) ve FLAGS'lari
+   bozuyordu (piece5 cmp eax,0 -> piece6 jne YANLIS aliniyordu). Cozum: pushfq/push rax giriste,
+   pop rax/popfq + jmp r11 cikista; bye yolu stack dengesiyle yeniden kurgulandi.
+9. fb kullanildiktan sonraki cagri tekrar arena deniyordu; .maze decrypt-once ile plaintext
+   oldugundan mod karisimi cop uretiyordu. Cozum: stub basinda fb flag kontrolu.
+10. (BU OTURUM) EXE'ler eski derlemeden kaliyordu: icindeki stage HENIZ bug'li 1-tur CRC
+   dongusunu (mov edx,r8d/shl/bt/sbb) tasiyordu - gercek CRC-8 8 tur ister; runtime CRC=0xC2
+   hesapliyor, build beklenen=0x01 -> jne ALINIYOR -> hicbir parca calismiyor -> score=0.
+   Unicorn komut-komut izinde yakalandi (cmp r8b,r11b sonrasi jne 0x...1D9 aliniyor).
+   Cozum: mp_driver GUNCEL header ile yeniden derlendi; EXE'ler yeniden uretildi.
+   DERS: motor degistiginde mp_driver + EXE'ler mutlaka yeniden derlenmeli (derleme
+   tazeligini test scriptleri otomatik kontrol etmiyor).
+
+8) DOSYALAR
+----------------------------------------------------------------------------------------------------
+ - V4method1_TekTek.zip   : ArenaV4_TekTek EXE + harita + test kanitlari + kaynak + arac
+ - V4method2_Stream.zip   : ArenaV4_Stream EXE + harita + test/anti-patch/kanit dosyalari + kaynak + arac
+ - Motor: MazeProtector.h (BuildStream / EmitStreamStub / EmitStreamStage / EmitStreamFbStage)
+ - Surucu: mp_driver.cpp (MP_STREAM=1 god-tier, MP_TEKTEK=1 duz fikir, MP_ONLY=MovePlayer)
+ - Dogrulama: unicorn_run.py + mp_v4_dump.py (statik) + mp_antipatch_test.py + mp_v4_proofs.py

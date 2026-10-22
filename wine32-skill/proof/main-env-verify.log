@@ -1,0 +1,28 @@
+=== 0/9 ortam kontrolü ===
+OS: Debian GNU/Linux 13 (trixie) | suite=trixie | HOME=/home/z | ld.so hedefi=/home/z/l/ld.so
+=== 2/9 root'suz paketler (libc6:i386, libgcc-s1:i386, patchelf, qemu-user) ===
+=== 1/9 apt update (kullanıcı ağacı, trixie) ===
+W: Target Packages (main/binary-all/Packages) is configured multiple times in /home/z/aptroot/etc/apt/sources.list:1 and /home/z/aptroot/etc/apt/sources.list:2
+i386 loader: /home/z/l/ld.so (216K)
+Wine zaten kurulu: /home/z/wine-wow64/wine-11.20-x86
+=== 4/9 patchelf: ELF32'lere interpreter + rpath ===
+patched: 44 ELF32
+=== 5/9 exec-zinciri sarmalayıcıları (native i386 exec'i qemu'ya kilitler) ===
+wrapper var: /home/z/wine-wow64/wine-11.20-x86/bin/wine
+wrapper var: /home/z/wine-wow64/wine-11.20-x86/bin/wineserver
+wrapper var: /home/z/wine-wow64/wine-11.20-x86/lib/wine/i386-unix/wine-preloader
+=== 6/9 launcher: $HOME/.local/bin/wine32 (+ $HOME/wine32) ===
+launcher hazır: wine32 (PATH'e ~/.local/bin ekleyin)
+=== 7/9 WINEPREFIX başlatma (WINEARCH=win32) ===
+prefix zaten var: /home/z/.wine32
+mingw zaten kurulu
+=== 9/9 uçtan uca doğrulama ===
+derleme OK: PE32 executable for MS Windows 4.00 (console), Intel i386, 1...
+wine çıktısı: [Merhaba 32-bit!] | exit=0
+
+############################ PASS ############################
+# 32-bit Wine çalışıyor. Kullanım:
+#   export PATH="$HOME/.local/bin:$PATH"
+#   wine32 program.exe        # 32-bit PE çalıştır
+#   wine32 cmd /c "echo test" # Windows komutu
+###############################################################

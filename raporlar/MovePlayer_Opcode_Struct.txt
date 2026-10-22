@@ -1,0 +1,206 @@
+====================================================================================================
+A) MOVEPLAYER SINIRI - 3 KAYNAKLI CAPRAZ TESPIT (kullanicinin "pdb ile base end" fikri)
+====================================================================================================
+Sifresiz: /tmp/my-project/download/MazeProtector_Demo_V3/MazeGame_Sifresiz.exe
+ImageBase=0x140000000  SizeOfImage=0xB000  (27 .pdata RUNTIME_FUNCTION)
+
+KAYNAK                     BASE           END            BOYUT   
+----------------------------------------------------------------------------------------------------
+.pdata RTF                 0x00001C40     0x00001C9C     92      (.pdata: PE'nin KENDI fonksiyon tablosu - PDB gerektirmez)
+.gfn                       0x00001C40     -              -         (.gfn kaydi: isim=MovePlayer; boyut .pdata'den)
+PDB (MazeGame.pdb)         (MovePlayer kaydi yok - BU PDB eski/farkli bir build (iinde MovePlayer sembolu hic yok).)
+                           -> DERS: PDB'ye baglanma. .pdata her x64 PE'nin icinde GOMULU; mp_driver zaten
+                              .pdata+.gfn kullanir. PDB varsa otomatik kaynak olur, yoksa hat. (SOLID)
+----------------------------------------------------------------------------------------------------
+SONUC: base=0x1C40 end=0x1C9C boyut=92 bayt  -> .pdata + .gfn AYNI degeri veriyor [OK]
+
+====================================================================================================
+B) OPCODE STRUCT TABLOSU - komut komut (kullanicinin istedigi "resmen struct")
+====================================================================================================
+idx | RVA(base+) | CE VA       | bayt(lar)             | U | komut                      | RVA? | ref hedefi            | V3 c
+----------------------------------------------------------------------------------------------------
+  0 | 0x00001C40 | 0x140001C40 | 55                    | 1 | push rbp                   | hayir |                       | c1
+  1 | 0x00001C41 | 0x140001C41 | 48 83 EC 40           | 4 | sub rsp, 0x40              | hayir |                       | c1
+  2 | 0x00001C45 | 0x140001C45 | 48 8D 6C 24 40        | 5 | lea rbp, [rsp + 0x40]      | hayir |                       | c1
+  3 | 0x00001C4A | 0x140001C4A | 48 89 4D F8           | 4 | mov qword ptr [rbp - 8], r | hayir |                       | c2
+  4 | 0x00001C4E | 0x140001C4E | 89 55 F4              | 3 | mov dword ptr [rbp - 0xc], | hayir |                       | c2
+  5 | 0x00001C51 | 0x140001C51 | 44 89 45 F0           | 4 | mov dword ptr [rbp - 0x10] | hayir |                       | c2
+  6 | 0x00001C55 | 0x140001C55 | 48 8B 45 F8           | 4 | mov rax, qword ptr [rbp -  | hayir |                       | c3
+  7 | 0x00001C59 | 0x140001C59 | 8B 00                 | 2 | mov eax, dword ptr [rax]   | hayir |                       | c3
+  8 | 0x00001C5B | 0x140001C5B | 03 45 F4              | 3 | add eax, dword ptr [rbp -  | hayir |                       | c3
+  9 | 0x00001C5E | 0x140001C5E | 89 45 EC              | 3 | mov dword ptr [rbp - 0x14] | hayir |                       | c3
+ 10 | 0x00001C61 | 0x140001C61 | 48 8B 45 F8           | 4 | mov rax, qword ptr [rbp -  | hayir |                       | c4
+ 11 | 0x00001C65 | 0x140001C65 | 8B 40 04              | 3 | mov eax, dword ptr [rax +  | hayir |                       | c4
+ 12 | 0x00001C68 | 0x140001C68 | 03 45 F0              | 3 | add eax, dword ptr [rbp -  | hayir |                       | c4
+ 13 | 0x00001C6B | 0x140001C6B | 89 45 E8              | 3 | mov dword ptr [rbp - 0x18] | hayir |                       | c5
+ 14 | 0x00001C6E | 0x140001C6E | 48 8B 4D F8           | 4 | mov rcx, qword ptr [rbp -  | hayir |                       | c5
+ 15 | 0x00001C72 | 0x140001C72 | 8B 55 EC              | 3 | mov edx, dword ptr [rbp -  | hayir |                       | c5
+ 16 | 0x00001C75 | 0x140001C75 | 44 8B 45 E8           | 4 | mov r8d, dword ptr [rbp -  | hayir |                       | c6
+ 17 | 0x00001C79 | 0x140001C79 | E8 52 FF FF FF        | 5 | call 0x140001bd0           | EVET | modul-ICI 0x1BD0 (IsW | c6
+ 18 | 0x00001C7E | 0x140001C7E | 83 F8 00              | 3 | cmp eax, 0                 | hayir |                       | c6
+ 19 | 0x00001C81 | 0x140001C81 | 75 13                 | 2 | jne 0x140001c96            | EVET | FN-ICI op#26 (epilog) | c7
+ 20 | 0x00001C83 | 0x140001C83 | 8B 4D EC              | 3 | mov ecx, dword ptr [rbp -  | hayir |                       | c7
+ 21 | 0x00001C86 | 0x140001C86 | 48 8B 45 F8           | 4 | mov rax, qword ptr [rbp -  | hayir |                       | c8
+ 22 | 0x00001C8A | 0x140001C8A | 89 08                 | 2 | mov dword ptr [rax], ecx   | hayir |                       | c8
+ 23 | 0x00001C8C | 0x140001C8C | 8B 4D E8              | 3 | mov ecx, dword ptr [rbp -  | hayir |                       | c8
+ 24 | 0x00001C8F | 0x140001C8F | 48 8B 45 F8           | 4 | mov rax, qword ptr [rbp -  | hayir |                       | c9
+ 25 | 0x00001C93 | 0x140001C93 | 89 48 04              | 3 | mov dword ptr [rax + 4], e | hayir |                       | c9
+ 26 | 0x00001C96 | 0x140001C96 | 48 83 C4 40           | 4 | add rsp, 0x40              | hayir |                       | c9
+ 27 | 0x00001C9A | 0x140001C9A | 5D                    | 1 | pop rbp                    | hayir |                       | c9
+ 28 | 0x00001C9B | 0x140001C9B | C3                    | 1 | ret                        | hayir |                       | c10
+----------------------------------------------------------------------------------------------------
+TOPLAM: 29 opcode / 92 bayt | RVA-tasiyan: 2 / 29 | diger 27 komut konum-bagimsiz (kopyalaninca birebir calisir)
+
+====================================================================================================
+C) OPCODE SAYIMI - "push rbp 1 tane (55)" formati
+====================================================================================================
+KOMUT                        ADET    BAYT/op    opcode(lar) + gorundugu idx
+----------------------------------------------------------------------------------------------------
+mov rax, qword ptr [rbp - 8] 4       4          48 8B 45 F8   (6,10,21,24)
+push rbp                     1       1          55   (0)
+sub rsp, 0x40                1       4          48 83 EC 40   (1)
+lea rbp, [rsp + 0x40]        1       5          48 8D 6C 24 40   (2)
+mov qword ptr [rbp - 8], rcx 1       4          48 89 4D F8   (3)
+mov dword ptr [rbp - 0xc], e 1       3          89 55 F4   (4)
+mov dword ptr [rbp - 0x10],  1       4          44 89 45 F0   (5)
+mov eax, dword ptr [rax]     1       2          8B 00   (7)
+add eax, dword ptr [rbp - 0x 1       3          03 45 F4   (8)
+mov dword ptr [rbp - 0x14],  1       3          89 45 EC   (9)
+mov eax, dword ptr [rax + 4] 1       3          8B 40 04   (11)
+add eax, dword ptr [rbp - 0x 1       3          03 45 F0   (12)
+mov dword ptr [rbp - 0x18],  1       3          89 45 E8   (13)
+mov rcx, qword ptr [rbp - 8] 1       4          48 8B 4D F8   (14)
+mov edx, dword ptr [rbp - 0x 1       3          8B 55 EC   (15)
+mov r8d, dword ptr [rbp - 0x 1       4          44 8B 45 E8   (16)
+call 0x140001bd0             1       5          E8 52 FF FF FF   (17)
+cmp eax, 0                   1       3          83 F8 00   (18)
+jne 0x140001c96              1       2          75 13   (19)
+mov ecx, dword ptr [rbp - 0x 1       3          8B 4D EC   (20)
+mov dword ptr [rax], ecx     1       2          89 08   (22)
+mov ecx, dword ptr [rbp - 0x 1       3          8B 4D E8   (23)
+mov dword ptr [rax + 4], ecx 1       3          89 48 04   (25)
+add rsp, 0x40                1       4          48 83 C4 40   (26)
+pop rbp                      1       1          5D   (27)
+ret                          1       1          C3   (28)
+----------------------------------------------------------------------------------------------------
+Benzersiz komut sekilleri: 26 | En cok tekrar: mov rax, qword ptr [rbp - 8] x4 | Toplam bayt: 92
+
+====================================================================================================
+D) PER-OP SIFRELI BAYTLAR (kullanicinin "ff olayi") + C STRUCT DOKUMU
+====================================================================================================
+Not: duz 0xFF maskesi trivyal geri donusturulur; burada her opcode'un baytlari
+anahtar byte'lariyla + opcode INDISI tuzuyla XOR'landi: enc[j] = plain[j] ^ kb[(j+3*idx)&7].
+V4'te tuz yerine cagri-basi turetilen alt-anahtar kullanilacak (cagri A'nin dump'i cagri B'de ise yaramaz).
+
+idx | duz bayt                | sifreli bayt            | tuz
+----------------------------------------------------------------------------------------------------
+  0 | 55                      | B4                      | idx*3&7=0
+  1 | 48 83 EC 40             | E0 07 24 0F             | idx*3&7=3
+  2 | 48 8D 6C 24 40          | 07 2C 8D 87 4C          | idx*3&7=6
+  3 | 48 89 4D F8             | EB 85 E5 7C             | idx*3&7=1
+  4 | 89 55 F4                | 0D 9D BB                | idx*3&7=4
+  5 | 44 89 45 F0             | E5 68 E6 FC             | idx*3&7=7
+  6 | 48 8B 45 F8             | 44 23 C1 30             | idx*3&7=2
+  7 | 8B 00                   | 43 4F                   | idx*3&7=5
+  8 | 03 45 F4                | E2 E6 F8                | idx*3&7=0
+  9 | 89 45 EC                | 21 C1 24                | idx*3&7=3
+ 10 | 48 8B 45 F8             | 07 2A A4 5B             | idx*3&7=6
+ 11 | 8B 40 04                | 28 4C AC                | idx*3&7=1
+ 12 | 03 45 F0                | 87 8D BF                | idx*3&7=4
+ 13 | 89 45 E8                | 28 A4 4B                | idx*3&7=7
+ 14 | 48 8B 4D F8             | 44 23 C9 30             | idx*3&7=2
+ 15 | 8B 55 EC                | 43 1A 4D                | idx*3&7=5
+ 16 | 44 8B 45 E8             | A5 28 49 40             | idx*3&7=0
+ 17 | E8 52 FF FF FF          | 40 D6 37 B0 5E          | idx*3&7=3
+ 18 | 83 F8 00                | CC 59 E1                | idx*3&7=6
+ 19 | 75 13                   | D6 1F                   | idx*3&7=1
+ 20 | 8B 4D EC                | 0F 85 A3                | idx*3&7=4
+ 21 | 48 8B 45 F8             | E9 6A E6 F4             | idx*3&7=7
+ 22 | 89 08                   | 85 A0                   | idx*3&7=2
+ 23 | 8B 4D E8                | 43 02 49                | idx*3&7=5
+ 24 | 48 8B 45 F8             | A9 28 49 50             | idx*3&7=0
+ 25 | 89 48 04                | 21 CC CC                | idx*3&7=3
+ 26 | 48 83 C4 40             | 07 22 25 E3             | idx*3&7=6
+ 27 | 5D                      | FE                      | idx*3&7=1
+ 28 | C3                      | 47                      | idx*3&7=4
+
+-- C struct (V4 .maze kayit formatinin cekirdegi - gercek veri) --
+typedef struct {
+    unsigned char enc[16];   // sifreli opcode baytlari
+    unsigned char len;       // komut uzunlugu (1..15)
+    unsigned char isRva;     // 1 = modul icinde adres tasiyor
+    unsigned char refKind;   // 0 yok 1=E8 call 2=E9 jmp 3=0F8x jcc 4=rel8 jcc 5=RIP-rel
+    unsigned char salt;      // sifre tuzu (V4: cagri-basi alt-anahtar indeksi)
+    unsigned int  refRva;    // refKind > 0 ise hedef RVA
+} MzOp;
+
+static const MzOp g_movePlayerOps[29] = {
+    {/* 0*/{0xB4 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00}, 1,0,0,0,0x00000000},
+    {/* 1*/{0xE0 0x07 0x24 0x0F 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00}, 4,0,0,1,0x00000000},
+    {/* 2*/{0x07 0x2C 0x8D 0x87 0x4C 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00}, 5,0,0,2,0x00000000},
+    {/* 3*/{0xEB 0x85 0xE5 0x7C 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00}, 4,0,0,3,0x00000000},
+    {/* 4*/{0x0D 0x9D 0xBB 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00}, 3,0,0,4,0x00000000},
+    {/* 5*/{0xE5 0x68 0xE6 0xFC 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00}, 4,0,0,5,0x00000000},
+    {/* 6*/{0x44 0x23 0xC1 0x30 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00}, 4,0,0,6,0x00000000},
+    {/* 7*/{0x43 0x4F 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00}, 2,0,0,7,0x00000000},
+    {/* 8*/{0xE2 0xE6 0xF8 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00}, 3,0,0,8,0x00000000},
+    {/* 9*/{0x21 0xC1 0x24 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00}, 3,0,0,9,0x00000000},
+    {/*10*/{0x07 0x2A 0xA4 0x5B 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00}, 4,0,0,10,0x00000000},
+    {/*11*/{0x28 0x4C 0xAC 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00}, 3,0,0,11,0x00000000},
+    {/*12*/{0x87 0x8D 0xBF 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00}, 3,0,0,12,0x00000000},
+    {/*13*/{0x28 0xA4 0x4B 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00}, 3,0,0,13,0x00000000},
+    {/*14*/{0x44 0x23 0xC9 0x30 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00}, 4,0,0,14,0x00000000},
+    {/*15*/{0x43 0x1A 0x4D 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00}, 3,0,0,15,0x00000000},
+    {/*16*/{0xA5 0x28 0x49 0x40 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00}, 4,0,0,16,0x00000000},
+    {/*17*/{0x40 0xD6 0x37 0xB0 0x5E 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00}, 5,1,1,17,0x00001BD0},   // call 0x140001bd0 -> IsWall
+    {/*18*/{0xCC 0x59 0xE1 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00}, 3,0,0,18,0x00000000},
+    {/*19*/{0xD6 0x1F 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00}, 2,1,4,19,0x00001C96},   // jne 0x140001c96 -> FN-ICI (epilog)
+    {/*20*/{0x0F 0x85 0xA3 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00}, 3,0,0,20,0x00000000},
+    {/*21*/{0xE9 0x6A 0xE6 0xF4 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00}, 4,0,0,21,0x00000000},
+    {/*22*/{0x85 0xA0 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00}, 2,0,0,22,0x00000000},
+    {/*23*/{0x43 0x02 0x49 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00}, 3,0,0,23,0x00000000},
+    {/*24*/{0xA9 0x28 0x49 0x50 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00}, 4,0,0,24,0x00000000},
+    {/*25*/{0x21 0xCC 0xCC 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00}, 3,0,0,25,0x00000000},
+    {/*26*/{0x07 0x22 0x25 0xE3 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00}, 4,0,0,26,0x00000000},
+    {/*27*/{0xFE 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00}, 1,0,0,27,0x00000000},
+    {/*28*/{0x47 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00}, 1,0,0,28,0x00000000},
+};
+
+-- RVA-TASIYANLARIN GRUPSAL TABLOSU (kullanici: "rva lilar rva lariyla grupsal yazilacak") --
+typedef struct { unsigned int siteIdx; unsigned char refKind; unsigned int refRva; } MzRef;
+static const MzRef g_movePlayerRefs[2] = {
+    {17, 1, 0x00001BD0},   // op#17 call 0x140001bd0
+    {19, 4, 0x00001C96},   // op#19 jne 0x140001c96
+};
+
+====================================================================================================
+E) DOGRULAMA - "CAPSTONE YANLIS COZERSE?" KONTROL LISTESI
+====================================================================================================
+[1] Son komut ret: ret (C3) -> OK
+[2] Komut uzunluklari toplami = 92 == .pdata boyutu 92 -> OK
+[3] Dal hedefleri komut sinirinda mi:
+    op#17 call     -> 0x1BD0 : modul-ici [OK]
+    op#19 jne      -> 0x1C96 : FN-ICI, op#26 basina dusuyor [OK]
+[4] Izole re-decode: 29/29 opcode tek basina cozulup ayni sonucu verdi -> parca kesimleri GUVENLI
+[5] .reloc taramasi: 96 kayit, fonksiyon govdesinde MUTLAK adres: 0 -> temiz (rel32/RIP-rel nispi - tasinabilir)
+[6] Bilinen degerlerle capraz: op#0=push(55) op#17=call(0x1BD0) op#28=ret(C3) -> OK
+
+TUM KONTROLLER TEMIZ: 29 opcode'un struct'i dogru kesilmis; bu tablo V4'un dosya formati olabilir.
+
+====================================================================================================
+F) OP -> PARCA HARITASI (V3 motor kuraliyla: chunkMax=12, jcc->6B, ret->5B)
+====================================================================================================
+  c1  [op00..op02] 10 bayt(guncel): op0(push) op1(sub) op2(lea)
+  c2  [op03..op05] 11 bayt(guncel): op3(mov) op4(mov) op5(mov)
+  c3  [op06..op09] 12 bayt(guncel): op6(mov) op7(mov) op8(add) op9(mov)
+  c4  [op10..op12] 10 bayt(guncel): op10(mov) op11(mov) op12(add)
+  c5  [op13..op15] 10 bayt(guncel): op13(mov) op14(mov) op15(mov)
+  c6  [op16..op18] 12 bayt(guncel): op16(mov) op17(call) op18(cmp)
+  c7  [op19..op20]  9 bayt(guncel): op19(jne) op20(mov)
+  c8  [op21..op23]  9 bayt(guncel): op21(mov) op22(mov) op23(mov)
+  c9  [op24..op27] 12 bayt(guncel): op24(mov) op25(mov) op26(add) op27(pop)
+  c10 [op28..op28]  5 bayt(guncel): op28(ret)
+
+GORULECEGI GIBI: parcalar zaten 1-4 komutluk. Yani "tek tek" ile bugunku V3 arasindaki
+tek fark: V3 TUM parcalari ayni anda arenaya yazar; V4 her adimda SADECE 1 parca cozer,
+oncekini SIFIRLAR (wipe-behind). Bu fark raporun tasarim bolumunde uygulanir.

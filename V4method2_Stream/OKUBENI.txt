@@ -1,0 +1,66 @@
+====================================================================================================
+OKUBENI - V4method2 STREAM god-tier (24B slot + wipe-behind + G1/G2/G3) - MazeProtector ARENA-V4
+====================================================================================================
+
+BU NEDIR
+----------------------------------------------------------------------------------------------------
+V4method1 (TekTek)'in uzerine 3 god-tier katman: TEK 24-32B slot + wipe-behind temelinde
+  G1 slot rastgelelestirme + G2 CRC-8 anti-patch (fail-closed) + G3 decoy enjeksiyonu.
+Kenarlar .maze'deki 10B thunk'lardan gecer (mov r10d,<parca>; jmp stage), stage wipe+decrypt+fix
+yapar, her cagri KENDI stage'ini kurar (thread yarisi yok). Slot konumu serbest -> her cagri
+baska adrese dusme (dump-replay olur).
+
+GUVCENLIK KATMANLARI + KANITLARI (unicorn ile olculdu)
+----------------------------------------------------------------------------------------------------
+ G1 SLOT RASTGELELESTIRME: stub her cagri rdtsc ile slot = slotBase + (rand & 0x3F)*16 secer.
+    KANIT: tam oyunda 64 BENZERSIZ slot adresi (0x3D0..0x7C0). Ayni parca her cagride baska
+    adreste -> "dump al, sonraki cagriyla esle" calismaz.
+
+ G2 CRC-8 ANTI-PATCH: her parca decrypt edilince CRC-8 (poly 0x07) slot uzerinden hesaplanir;
+    blk tablosundaki beklenen degerle eslesmezse stage frame'i sarilir, arena VirtualFree edilir
+    ve ExitProcess(0xDE) cagrilir - FAIL-CLOSED (yamali parca ASLA calismaz).
+    KANIT: .maze'deki sifreli span'in TEK bayti cevrildi -> exit=222 (0xDE) PASS.
+
+ G3 DECOY ENJEKSIYONU: %25 ihtimalle slot'a once 16-24B rastgele "yem parca" cozulur, WIPE ile
+    silinir, gercek parca gelir. Tek-adim izleyene gurultu: her stage'de baska parca gorunur.
+
+ LAZY COLD-PATH (bedava): duvar varsa jne alinir -> px/ny parcasi (c8/c9) o cagri HIC cozulmez.
+    KANIT (duvar-var yolu, 20000 cagri): pid7=0, pid8=0 stage - c8/c9 FIZIKSEL olarak cozulmedi.
+    Duvar-yok (normal BFS, 529 cagri): 10 parcanin hepsi 529'er kez cozuldu.
+
+TEST KANITLARI (unicorn, MP_ONLY=MovePlayer)
+----------------------------------------------------------------------------------------------------
+  baseline (Sifresiz)           : score=30 frame=529 WON=1 exit=0
+  Stream arena (tam oyun)       : score=30 frame=529 WON=1 exit=0   <- birebir esit davranis
+  Stream fallback (8 alloc fail): score=30 frame=529 WON=1 exit=0   <- YERINDE mod da kazanir
+  G2 anti-patch negatif test    : exit=222 (0xDE) PASS
+  G1 slot cesitliligi           : 64 benzersiz adres
+  Cold-path (duvar-var)         : pid7/pid8 = 0 stage
+
+V3 KARSILASTIRMA (ozet - tamami raporda)
+----------------------------------------------------------------------------------------------------
+  Her an bitisik plaintext : V3 248B (tam fn)  ->  V4 max 24B (1 parca)
+  Dump -> tam fonksiyon    : V3 1 dump YETER   ->  V4 eksik + adres kaymasi + yamada 0xDE
+  Cagri-basi adres         : V3 arena taban    ->  V4 64 slot konumu (G1)
+  Anti-patch               : V3 yok            ->  V4 CRC-8 fail-closed
+
+DOSYALAR
+----------------------------------------------------------------------------------------------------
+  MazeGame_Sifreli_ArenaV4_Stream.exe  : korunmus oyun (god-tier, tek fonksiyon: MovePlayer)
+  MazeMap_ArenaV4_Stream.txt           : CE haritasi (parca/thunk/site dokumu dahil)
+  MazeGame_kaynak.cpp / .exe           : referans sifresiz oyun
+  Test_Kanitlari/                      : unicorn ciktilari + anti-patch testi + kanitlar
+  Linux_Dogrulama_Araclari/            : unicorn_run.py + mp_driver + build komutu
+  i4MConsoleLoader_kaynak/             : MazeProtector.h dahil motor kaynaklari
+  V4_Guvenlik_Raporu.txt               : karsilastirma + G5 (TF/VEH) ve G6 (mini-VM) maliyet analizi
+
+CALISTIRMA
+----------------------------------------------------------------------------------------------------
+  Windows : MazeGame_Sifreli_ArenaV4_Stream.exe
+  Test    : MazeGame_Sifreli_ArenaV4_Stream.exe auto
+  Cheat Engine: modulBase + RVA -> labirent sifreli gorunur; tramboline BP, adimla: rax = arena,
+                slot her cagride farkli (G1). Bir parcayi arenada degistirirsen: 0xDE ile kapanir.
+  Linux dogrulama: python3 unicorn_run.py MazeGame_Sifreli_ArenaV4_Stream.exe auto
+  Yeniden uretim: MP_ONLY=MovePlayer MP_STREAM=1 ./mp_driver MazeGame.exe cikis.exe harita.txt stream
+  Not: .maze'deki 256B CRC tablosu jenerik sabittir (kod icermez).
+====================================================================================================

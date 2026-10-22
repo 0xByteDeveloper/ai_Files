@@ -1,0 +1,10 @@
+=== V4 STREAM KANITLARI ===
+MovePlayer cagri sayisi (trambolin): 20000
+Stage gecisleri (pid<0xF0): 160000
+IsWall: duvar=20000 bos=0  (duvar-orani %100)
+G1: benzersiz slot adresi sayisi: 64
+    slot ofsetleri (ilk 12): ['0x3d0', '0x3e0', '0x3f0', '0x400', '0x410', '0x420', '0x430', '0x440', '0x450', '0x460', '0x470', '0x480']
+Parca stage sayilari: {0: 20000, 1: 20000, 2: 20000, 3: 20000, 4: 20000, 5: 20000, 6: 20000, 9: 20000}
+    min=20000 max=20000 -> FARK=0 (cold-path kaniti: c8/px-ny parcasi
+    duvar alinan cagrilarda stage bile kurulmadi = LAZY DECRYPT GERCEK)
+Cleanup (pid>=0xF0): 20000

@@ -1,0 +1,56 @@
+====================================================================================================
+OKUBENI - V4method1 TEK TEK (wipe-behind) - MazeProtector ARENA-V4
+====================================================================================================
+
+BU NEDIR
+----------------------------------------------------------------------------------------------------
+Kullanicinin fikrinin motor-gercek hali: "parcalari TEK yere tek tek yaz; yeni parca yazilirken
+oncekini SIL". Wipe-behind olmadan parcalar birikir ve op0+...+op28 yine tam fonksiyon olurdu -
+wipe-behind bu birikimi kirar: HER AN arenada MAX 1 parca (24 bayt) plaintext vardir, tam
+fonksiyon hicbir an hicbir yerde bitisik olarak var olmaz.
+
+NASIL CALISIR (ArenaV4_TekTek)
+----------------------------------------------------------------------------------------------------
+1) Oyun MovePlayer'i cagirir -> trambolin (.maze'de sifreli gorunur) -> giris stub'i
+2) Stub: VirtualAlloc(4096B RWX) -> stage template'ini kopyalar -> xor r10d,0 (pid=0) -> stage'e atlar
+3) Stage: slot 32B SIFIRLA (wipe-behind) -> parca decrypt (XOR K) -> rel32 disp'leri slot'a gore
+   duzelt -> slot'a atla (1 parca calisir, ~3-12 bayt)
+4) Parcanin kuyrugu .maze'deki 9B plaintext THUNK'a gider: mov r10d,<sonrakiParca>; jmp conv
+   -> stage tekrar: ONCEKI PARCA SILINIR, yenisi cozulur...
+5) Son parca ret yerine cleanup-thunk'a -> farewell (VirtualFree + ret) -> arena tamamen kaybolur
+6) Fallback: VirtualAlloc 8 deneme basarisiz -> YERINDE stream (decrypt-once flagi ile .maze'de kosar)
+
+GUVCENLIK OZETI
+----------------------------------------------------------------------------------------------------
+ + Her an max 24B plaintext (V3'te 248B = tam fonksiyon)
+ + Dump tek basina YETERSIZ: dump'da parcalar eksik; tamami icin surekli izleme + elle birlestirme
+ + Lazy cold-path: duvar varsa jne alinir -> px/ny parcasi o cagri HIC cozulmez (KANIT: pid7/8=0)
+ - G1 (slot rastgele), G2 (CRC anti-patch), G3 (decoy) KAPALI - bunlar V4method2 STREAM'de
+   (kullanicinin duz fikri iste bu; god-tier istenirse diger zip)
+
+TEST KANITLARI (unicorn, MP_ONLY=MovePlayer)
+----------------------------------------------------------------------------------------------------
+  baseline (Sifresiz)          : score=30 frame=529 WON=1 exit=0
+  TekTek arena (tam oyun)      : score=30 frame=529 WON=1 exit=0   <- birebir esit davranis
+  TekTek fallback (8 alloc fail): score=30 frame=529 WON=1 exit=0  <- YERINDE mod da kazanir
+  (duvar-var/yok iki yol dogal olarak oynanir; cold-path kaniti V4 raporunda)
+
+DOSYALAR
+----------------------------------------------------------------------------------------------------
+  MazeGame_Sifreli_ArenaV4_TekTek.exe : korunmus oyun (tek fonksiyon: MovePlayer)
+  MazeMap_ArenaV4_TekTek.txt          : CE icin JMP/parca haritasi (modulBase + RVA)
+  MazeGame_kaynak.cpp / .exe          : referans sifresiz oyun
+  Test_Kanitlari/                     : unicorn test ciktilari
+  Linux_Dogrulama_Araclari/           : unicorn_run.py + mp_driver + build komutu
+  i4MConsoleLoader_kaynak/            : MazeProtector.h dahil motor kaynaklari
+  V4_Guvenlik_Raporu.txt              : iki yontemin karsilastirmasi + G5/G6 maliyet analizi
+
+CALISTIRMA
+----------------------------------------------------------------------------------------------------
+  Windows : MazeGame_Sifreli_ArenaV4_TekTek.exe        (interaktif labirent)
+  Test    : MazeGame_Sifreli_ArenaV4_TekTek.exe auto   (AUTOTEST: score=30 WON=1 beklenir)
+  Cheat Engine: modulBase + RVA (haritadan) -> sifreli/gorunmez labirent; tramboline BP koyup
+                adimla: VirtualAlloc sonrasi rax = arena tabani, slot = arena + G1-kapali-sabit.
+  Linux dogrulama: python3 unicorn_run.py MazeGame_Sifreli_ArenaV4_TekTek.exe auto
+  Yeniden uretim: MP_ONLY=MovePlayer MP_TEKTEK=1 ./mp_driver MazeGame.exe cikis.exe harita.txt tektek
+====================================================================================================

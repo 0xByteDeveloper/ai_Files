@@ -1,0 +1,62 @@
+# MazeMap - i4M MazeProtector (Jump labirenti haritasi)
+# Format: FUNC <isim> <fnRva> <fnSize> <entryRva> <chunk> <jmpSayisi> sonra JMP satirlari
+# RVA'lar ImageBase'e gore. Cheat Engine: modulBase + RVA
+# KAPSAM: MP_ONLY - sadece MovePlayer korundu (sicak yol plaintext: cizim/girdi/dongu sifresiz)
+# MODE ARENA-V4-STREAM (god-tier, MP_STREAM): parcalar TEK TEK tek bir 32B slot'a
+#  cozulur, WIPE-BEHIND oncekini siler -> her an arenada max 1 parca plaintext;
+#  tam fonksiyon HICBIR an bitisik var olmaz. G1: slot her cagride rastgele adrese
+#  duser (dump-replay olur). G2: CRC-8 parca butunlugu (anti-patch). G3: %25 decoy
+#  enjeksiyonu. Kenarlar .maze'deki 9B thunk'lardan gecer; duvar varsa jne alinir
+#  ve px/ny parcasi o cagride HIC cozulmez (lazy cold-path).
+FUNC MovePlayer 7232 92 46075 10 12
+JMP 7232
+JMP 46576
+JMP 46585
+JMP 46594
+JMP 46603
+JMP 46612
+JMP 46621
+JMP 46630
+JMP 46639
+JMP 46648
+JMP 46657
+JMP 46666
+INFO conv-reg: r12 (stage adresi tasiyici; cagirilan fonksiyonlar ABI geregi korur)
+INFO mod=V4-STREAM hardened=1 slot=32B maxPiece=24B template=521B conv=r12 arena=4096B
+BLK 00 enc=0x03FB len=16 ops= 3 rva=0x1C40..0x1C4A sites=1 crc=0x0E
+BLK 01 enc=0x046B len=16 ops= 3 rva=0x1C4A..0x1C55 sites=1 crc=0x03
+BLK 02 enc=0x03E3 len=24 ops= 4 rva=0x1C55..0x1C61 sites=1 crc=0xDA
+BLK 03 enc=0x040B len=16 ops= 3 rva=0x1C61..0x1C6B sites=1 crc=0x2A
+BLK 04 enc=0x043B len=16 ops= 3 rva=0x1C6B..0x1C75 sites=1 crc=0xAE
+BLK 05 enc=0x03CB len=24 ops= 3 rva=0x1C75..0x1C81 sites=2 crc=0x8A
+BLK 06 enc=0x044B len=16 ops= 2 rva=0x1C81..0x1C86 sites=2 crc=0x6A
+BLK 07 enc=0x041B len=16 ops= 3 rva=0x1C86..0x1C8F sites=1 crc=0xED
+BLK 08 enc=0x045B len=16 ops= 2 rva=0x1C8F..0x1C96 sites=1 crc=0x68
+BLK 09 enc=0x042B len=16 ops= 3 rva=0x1C96..0x1C9C sites=1 crc=0xD6
+SITE blk=05 +0x05 kind=MODUL val=0x1BD0
+SITE blk=05 +0x0D kind=THUNK val=0x6
+SITE blk=02 +0x0D kind=THUNK val=0x3
+SITE blk=00 +0x0B kind=THUNK val=0x1
+SITE blk=03 +0x0B kind=THUNK val=0x4
+SITE blk=07 +0x0A kind=THUNK val=0x8
+SITE blk=09 +0x06 kind=THUNK val=0xFE
+SITE blk=04 +0x0B kind=THUNK val=0x5
+SITE blk=06 +0x02 kind=THUNK val=0x9
+SITE blk=06 +0x0A kind=THUNK val=0x7
+SITE blk=08 +0x08 kind=THUNK val=0x9
+SITE blk=01 +0x0C kind=THUNK val=0x2
+EDGE thunk=0xB5F0 mov r10d,0 -> parca0
+EDGE thunk=0xB5F9 mov r10d,1 -> parca1
+EDGE thunk=0xB602 mov r10d,2 -> parca2
+EDGE thunk=0xB60B mov r10d,3 -> parca3
+EDGE thunk=0xB614 mov r10d,4 -> parca4
+EDGE thunk=0xB61D mov r10d,5 -> parca5
+EDGE thunk=0xB626 mov r10d,6 -> parca6
+EDGE thunk=0xB62F mov r10d,7 -> parca7
+EDGE thunk=0xB638 mov r10d,8 -> parca8
+EDGE thunk=0xB641 mov r10d,9 -> parca9
+EDGE thunk=0xB64A mov r10d,0xFE -> cleanup
+WARN V4 STREAM AKTIF: her cagride VirtualAlloc ile tek sayfa arena acilir, parcalar TEK TEK 32B'lik slot'a cozulur, WIPE-BEHIND oncekini siler; her an max 1 parca plaintext
+WARN G1 slot her cagride rastgele adrese duser; G2 CRC-8 parca butunlugunu denetler; G3 %25 decoy enjeksiyonu
+WARN ARENA-V3 kurali gecerli: ayni fonksiyonu ayni anda coklu thread'te cagirmayin (fallback yolu decrypt-once flagi kullanir); VirtualAlloc basarisizsa otomatik YERINDE stream'a duser (crash yok)
+# TOPLAM: 1 fonksiyon korundu, 0 atlandi, 21 kapsam-disi (MP_ONLY), 12 JMP, 0 yem blok

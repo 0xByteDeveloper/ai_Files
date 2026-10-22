@@ -1,0 +1,18 @@
+capstone kutuphanesini buraya koyun:
+
+  capstone/
+  |-- capstone.lib        <- x64 statik/import kutuphanesi
+  `-- include/
+      `-- capstone/
+          `-- capstone.h  (+ diger basliklar)
+
+Indirme: https://github.com/capstone-engine/capstone/releases
+(x64 icin derlenmis capstone.lib gerekir)
+
+Alternatif: proje ozelliklerindeki eski mutlak yollar hala yedek olarak
+tanimli oldugu icin eski klasor yapinizdaki capstone da bulunursa derleme
+o yoldan bulur.
+
+NOT: capstone yalnizca Disassembly / Assembler / ByteInjector ozellikleri
+icin gereklidir. PEManualMapper.h (Windows loader emulasyonu) capstone
+ISTEMEZ.

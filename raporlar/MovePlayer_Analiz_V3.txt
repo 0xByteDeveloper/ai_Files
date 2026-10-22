@@ -1,0 +1,225 @@
+====================================================================================================
+A) ORIJINAL MovePlayer - MazeGame_Sifresiz.exe  (RVA 0x1C40, 92 bayt)
+   CE adresi = modulBase + RVA (senin oturumda modulBase = 0x140000000)
+====================================================================================================
+ImageBase=0x140000000  SizeOfImage=0xB000  Bolumler: .text@0x1000, .rdata@0x3000, .buildid@0x4000, .data@0x5000, .pdata@0x8000, .gfn@0x9000, .reloc@0xA000
+
+RVA          Baytlar                  Disassembly
+----------------------------------------------------------------------------------------------------
+0x00001C40   55                       push rbp                    
+0x00001C41   48 83 EC 40              sub rsp, 0x40               
+0x00001C45   48 8D 6C 24 40           lea rbp, [rsp + 0x40]       
+0x00001C4A   48 89 4D F8              mov qword ptr [rbp - 8], rcx
+0x00001C4E   89 55 F4                 mov dword ptr [rbp - 0xc], edx
+0x00001C51   44 89 45 F0              mov dword ptr [rbp - 0x10], r8d
+0x00001C55   48 8B 45 F8              mov rax, qword ptr [rbp - 8]
+0x00001C59   8B 00                    mov eax, dword ptr [rax]    
+0x00001C5B   03 45 F4                 add eax, dword ptr [rbp - 0xc]
+0x00001C5E   89 45 EC                 mov dword ptr [rbp - 0x14], eax
+0x00001C61   48 8B 45 F8              mov rax, qword ptr [rbp - 8]
+0x00001C65   8B 40 04                 mov eax, dword ptr [rax + 4]
+0x00001C68   03 45 F0                 add eax, dword ptr [rbp - 0x10]
+0x00001C6B   89 45 E8                 mov dword ptr [rbp - 0x18], eax
+0x00001C6E   48 8B 4D F8              mov rcx, qword ptr [rbp - 8]
+0x00001C72   8B 55 EC                 mov edx, dword ptr [rbp - 0x14]
+0x00001C75   44 8B 45 E8              mov r8d, dword ptr [rbp - 0x18]
+0x00001C79   E8 52 FF FF FF           call 0x140001bd0  ; -> 0x140001BD0 (IsWall)
+0x00001C7E   83 F8 00                 cmp eax, 0                  
+0x00001C81   75 13                    jne 0x140001c96  ; -> 0x140001C96
+0x00001C83   8B 4D EC                 mov ecx, dword ptr [rbp - 0x14]
+0x00001C86   48 8B 45 F8              mov rax, qword ptr [rbp - 8]
+0x00001C8A   89 08                    mov dword ptr [rax], ecx    
+0x00001C8C   8B 4D E8                 mov ecx, dword ptr [rbp - 0x18]
+0x00001C8F   48 8B 45 F8              mov rax, qword ptr [rbp - 8]
+0x00001C93   89 48 04                 mov dword ptr [rax + 4], ecx
+0x00001C96   48 83 C4 40              add rsp, 0x40               
+0x00001C9A   5D                       pop rbp                     
+0x00001C9B   C3                       ret                         
+
+Toplam: 29 komut, 92 bayt. Son komut: ret
+
+====================================================================================================
+B) MazeGame_Sifreli_ArenaV3_MoveOnly.exe - .maze bolumu + arena eslemesi
+====================================================================================================
+ImageBase=0x140000000  SizeOfImage=0xC000  Bolumler: .text@0x1000(vsz 0x1656), .rdata@0x3000(vsz 0x4A4), .buildid@0x4000(vsz 0x41), .data@0x5000(vsz 0x2170), .pdata@0x8000(vsz 0x144), .gfn@0x9000(vsz 0x160), .reloc@0xA000(vsz 0x60), .maze@0xB000(vsz 0x461)
+.maze RVA=0xB000 (CE: 0x14000B000)  rawOff=0x2C00 rawSz=0x600
+
+--- .maze header (0x40 bayt, PLAINTEXT) ---
+  magic=MZE2  nRegions=11  anahtar=0xA14FC884A80CA3E1
+  entryRva=0xB32C (1. mantiksal parcada 1. komut)  fnRva=0x1C40 fnSize=92
+  tableOff=0x3F5  arenaSize=1113  nSites=3  sitesOff=0x44D  encBytes=248  jmpSlot=0x0
+  STUB VirtualAlloc HINT = imgBase+SizeOfImage ustu 64K = 0x140010000  (senin dump adreslerinle eslesmeli)
+
+--- Trambolin (orijinal govde yerine) ---
+  0x1C40: E9 FB 93 00 00   E9 -> 0xB040  (stub: mazeRva+0x40)  | kalan 87 bayt: CC CC CC CC CC CC CC
+
+--- Bolge (span) tablosu @0x3F5: 11 sifreli bolge ---
+   off=0x1D8 len=  8  (.maze RVA 0xB1D8 .. 0xB1E0)
+   off=0x205 len= 16  (.maze RVA 0xB205 .. 0xB215)
+   off=0x231 len= 24  (.maze RVA 0xB231 .. 0xB249)
+   off=0x249 len= 16  (.maze RVA 0xB249 .. 0xB259)
+   off=0x280 len= 16  (.maze RVA 0xB280 .. 0xB290)
+   off=0x2B1 len= 16  (.maze RVA 0xB2B1 .. 0xB2C1)
+   off=0x2EA len= 24  (.maze RVA 0xB2EA .. 0xB302)
+   off=0x32C len= 16  (.maze RVA 0xB32C .. 0xB33C)
+   off=0x33C len= 16  (.maze RVA 0xB33C .. 0xB34C)
+   off=0x375 len= 24  (.maze RVA 0xB375 .. 0xB38D)
+   off=0x38D len= 72  (.maze RVA 0xB38D .. 0xB3D5)
+
+--- Site (delta-fix) tablosu @0x44D: 3 disp alanina runtime delta cikarilir ---
+   0x236, 0x3C0, 0x3CD
+
+--- GIRIS STUB (plaintext, 0x40..0x1D8, CE: 0x14000B040) - onemli satirlar ---
+   0x05B: 65 48 8B 04 25 60 00 00 00 mov rax, qword ptr gs:[0x60]
+   0x09B: FF 15 BF 81 FF FF        call qword ptr [rip - 0x7e41]  ; [0x140003260]
+   0x0B6: EB 9E                    jmp 0x14000b056  ; -> 0x14000B056
+   0x0B8: 49 89 C4                 mov r12, rax
+   0x0BB: 49 29 DC                 sub r12, rbx
+   0x10C: E9 BB FF FF FF           jmp 0x14000b0cc  ; -> 0x14000B0CC
+   0x12F: 4D 01 E3                 add r11, r12
+   0x13E: E9 D9 FF FF FF           jmp 0x14000b11c  ; -> 0x14000B11C
+   0x143: 4C 8B DB                 mov r11, rbx
+   0x146: 4D 01 E3                 add r11, r12
+   0x154: EB 68                    jmp 0x14000b1be  ; -> 0x14000B1BE
+   0x1A7: E9 C3 FF FF FF           jmp 0x14000b16f  ; -> 0x14000B16F
+   0x1D2: FF 25 60 FE FF FF        jmp qword ptr [rip - 0x1a0]  ; [0x14000B038]
+   (stub 110 komut / 408 bayt: 10 push, VirtualAlloc deneme dongusu, kopyala+XOR,
+    delta-fix dongusu, jmpSlot yazar, pop'lar, jmp qword [rip+..jmpSlot])
+
+--- FAREWELL (PLAINTEXT, .maze'de yasar, arena'ya KOPYALANMAZ) @0x3D5..0x3F5 ---
+   0x3D5: 48 8B 0C 24              mov rcx, qword ptr [rsp]
+   0x3D9: 83 7C 24 08 00           cmp dword ptr [rsp + 8], 0
+   0x3DE: 74 0E                    je 0x14000b3ee  ; -> 0x14000B3EE
+   0x3E0: 31 D2                    xor edx, edx
+   0x3E2: 41 B8 00 80 00 00        mov r8d, 0x8000
+   0x3E8: FF 15 7A 7E FF FF        call qword ptr [rip - 0x8186]  ; [0x140003268]
+   0x3EE: 48 83 C4 20              add rsp, 0x20
+   0x3F2: 58                       pop rax
+   0x3F3: C3                       ret
+   0x3F4: 90                       nop
+
+--- YEM BLOKLARI (plaintext, arena'ya kopyalanmaz) ---
+   gap @0x1E0 len=37: 90 E9 1F 00 00 00 85 C0 3D 9C D3 6B 6F 0F 31 85 C0 BE 08 9A 22 63 B9 A3...
+        0x1E0: 90                 nop
+        0x1E1: E9 1F 00 00 00     jmp 0x14000b205
+        0x1E6: 85 C0              test eax, eax
+        0x1E8: 3D 9C D3 6B 6F     cmp eax, 0x6f6bd39c
+   gap @0x215 len=28: E9 17 00 00 00 BC C2 7E 98 57 66 90 BE 15 7D 07 F6 C1 C0 13 85 C0 85 C0...
+        0x215: E9 17 00 00 00     jmp 0x14000b231
+        0x21A: BC C2 7E 98 57     mov esp, 0x57987ec2
+        0x21F: 66 90              nop
+        0x221: BE 15 7D 07 F6     mov esi, 0xf6077d15
+   gap @0x259 len=39: 90 90 E9 22 00 00 00 C1 C0 0C 85 C0 A8 B9 85 C0 C1 C0 14 C1 C0 0F 3D 0B...
+        0x259: 90                 nop
+        0x25A: 90                 nop
+        0x25B: E9 22 00 00 00     jmp 0x14000b282
+        0x260: C1 C0 0C           rol eax, 0xc
+   gap @0x290 len=33: 90 90 E9 1A 00 00 00 31 C0 85 C0 85 C0 0F 1F 40 00 B9 3D 3E A9 69 3D 52...
+        0x290: 90                 nop
+        0x291: 90                 nop
+        0x292: E9 1A 00 00 00     jmp 0x14000b2b1
+        0x297: 31 C0              xor eax, eax
+   gap @0x2C1 len=41: 90 90 E9 23 00 00 00 0F 1F 40 00 8B CD 0F 1F 40 00 A8 F4 B9 7D EE E3 3A...
+        0x2C1: 90                 nop
+        0x2C2: 90                 nop
+        0x2C3: E9 23 00 00 00     jmp 0x14000b2eb
+        0x2C8: 0F 1F 40 00        nop dword ptr [rax]
+   gap @0x302 len=42: E9 26 00 00 00 8B C9 A8 44 31 C0 31 C0 3D B9 55 6F A3 0F 1F 40 00 0F 1F...
+        0x302: E9 26 00 00 00     jmp 0x14000b32d
+        0x307: 8B C9              mov ecx, ecx
+        0x309: A8 44              test al, 0x44
+        0x30B: 31 C0              xor eax, eax
+   gap @0x34C len=41: 90 90 E9 26 00 00 00 0F 31 0F 31 A8 F4 3D AE AB 8D 19 3D 94 64 B9 A2 0F...
+        0x34C: 90                 nop
+        0x34D: 90                 nop
+        0x34E: E9 26 00 00 00     jmp 0x14000b379
+        0x353: 0F 31              rdtsc
+   (yem iceren bosluk sayisi: 7)
+
+====================================================================================================
+C) PARCA ZINCIRI (mantiksal akis) - XOR cozulmus icerik
+   arena = runtime VirtualAlloc base (0x140010000 bekleniyor); .maze RVA = ayni ofset ama DOSYADA SIFRELI
+====================================================================================================
+
+PARCA 1  | arena=0x14001032C  .maze RVA=0xB32C  span=0x32C..0x33C (16B)
+----------------------------------------------------------------------------------------------------
+   0x14001032C | 55                     push rbp                       [orig 0x1C40, bayt birebir ayni]
+   0x14001032D | 48 83 EC 40            sub rsp, 0x40                  [orig 0x1C41, bayt birebir ayni]
+   0x140010331 | 48 8D 6C 24 40         lea rbp, [rsp + 0x40]          [orig 0x1C45, bayt birebir ayni]
+   --> CONNECTOR: E9 -> arena 0x140010205  = PARCA 2 basina ziplar
+
+PARCA 2  | arena=0x140010205  .maze RVA=0xB205  span=0x205..0x215 (16B)
+----------------------------------------------------------------------------------------------------
+   0x140010205 | 48 89 4D F8            mov qword ptr [rbp - 8], rcx   [orig 0x1C4A, bayt birebir ayni]
+   0x140010209 | 89 55 F4               mov dword ptr [rbp - 0xc], edx [orig 0x1C4E, bayt birebir ayni]
+   0x14001020C | 44 89 45 F0            mov dword ptr [rbp - 0x10], r8d [orig 0x1C51, bayt birebir ayni]
+   --> CONNECTOR: E9 -> arena 0x140010375  = PARCA 3 basina ziplar
+
+PARCA 3  | arena=0x140010375  .maze RVA=0xB375  span=0x375..0x38D (24B)
+----------------------------------------------------------------------------------------------------
+   0x140010375 | 48 8B 45 F8            mov rax, qword ptr [rbp - 8]   [orig 0x1C55, bayt birebir ayni]
+   0x140010379 | 8B 00                  mov eax, dword ptr [rax]       [orig 0x1C59, bayt birebir ayni]
+   0x14001037B | 03 45 F4               add eax, dword ptr [rbp - 0xc] [orig 0x1C5B, bayt birebir ayni]
+   0x14001037E | 89 45 EC               mov dword ptr [rbp - 0x14], eax [orig 0x1C5E, bayt birebir ayni]
+   --> CONNECTOR: E9 -> arena 0x1400102B1  = PARCA 4 basina ziplar
+
+PARCA 4  | arena=0x1400102B1  .maze RVA=0xB2B1  span=0x2B1..0x2C1 (16B)
+----------------------------------------------------------------------------------------------------
+   0x1400102B1 | 48 8B 45 F8            mov rax, qword ptr [rbp - 8]   [orig 0x1C61, bayt birebir ayni]
+   0x1400102B5 | 8B 40 04               mov eax, dword ptr [rax + 4]   [orig 0x1C65, bayt birebir ayni]
+   0x1400102B8 | 03 45 F0               add eax, dword ptr [rbp - 0x10] [orig 0x1C68, bayt birebir ayni]
+   --> CONNECTOR: E9 -> arena 0x140010249  = PARCA 5 basina ziplar
+
+PARCA 5  | arena=0x140010249  .maze RVA=0xB249  span=0x249..0x259 (16B)
+----------------------------------------------------------------------------------------------------
+   0x140010249 | 89 45 E8               mov dword ptr [rbp - 0x18], eax [orig 0x1C6B, bayt birebir ayni]
+   0x14001024C | 48 8B 4D F8            mov rcx, qword ptr [rbp - 8]   [orig 0x1C6E, bayt birebir ayni]
+   0x140010250 | 8B 55 EC               mov edx, dword ptr [rbp - 0x14] [orig 0x1C72, bayt birebir ayni]
+   --> CONNECTOR: E9 -> arena 0x140010231  = PARCA 6 basina ziplar
+
+PARCA 6  | arena=0x140010231  .maze RVA=0xB231  span=0x231..0x249 (24B)
+----------------------------------------------------------------------------------------------------
+   0x140010231 | 44 8B 45 E8            mov r8d, dword ptr [rbp - 0x18] [orig 0x1C75, bayt birebir ayni]
+   0x140010235 | E8 96 69 FF FF         call 0x140001bd0               [orig 0x1C79 ayni komut, disp fixup: E8 52 FF FF FF]
+   0x14001023A | 83 F8 00               cmp eax, 0                     [orig 0x1C7E, bayt birebir ayni]
+   --> CONNECTOR: E9 -> arena 0x14001033C  = PARCA 7 basina ziplar
+
+PARCA 7  | arena=0x14001033C  .maze RVA=0xB33C  span=0x33C..0x34C (16B)
+----------------------------------------------------------------------------------------------------
+   0x14001033C | 0F 85 AF FF FF FF      jne 0x14000b2f1  ; -> 0x14000B2F1 [orig 0x1C81: jne 0x140001c96 | 75 13]
+   0x140010342 | 8B 4D EC               mov ecx, dword ptr [rbp - 0x14] [orig 0x1C83, bayt birebir ayni]
+   --> CONNECTOR: E9 -> arena 0x140010280  = PARCA 8 basina ziplar
+
+PARCA 8  | arena=0x140010280  .maze RVA=0xB280  span=0x280..0x290 (16B)
+----------------------------------------------------------------------------------------------------
+   0x140010280 | 48 8B 45 F8            mov rax, qword ptr [rbp - 8]   [orig 0x1C86, bayt birebir ayni]
+   0x140010284 | 89 08                  mov dword ptr [rax], ecx       [orig 0x1C8A, bayt birebir ayni]
+   0x140010286 | 8B 4D E8               mov ecx, dword ptr [rbp - 0x18] [orig 0x1C8C, bayt birebir ayni]
+   --> CONNECTOR: E9 -> arena 0x1400102EA  = PARCA 9 basina ziplar
+
+PARCA 9  | arena=0x1400102EA  .maze RVA=0xB2EA  span=0x2EA..0x302 (24B)
+----------------------------------------------------------------------------------------------------
+   0x1400102EA | 48 8B 45 F8            mov rax, qword ptr [rbp - 8]   [orig 0x1C8F, bayt birebir ayni]
+   0x1400102EE | 89 48 04               mov dword ptr [rax + 4], ecx   [orig 0x1C93, bayt birebir ayni]
+   0x1400102F1 | 48 83 C4 40            add rsp, 0x40                  [orig 0x1C96, bayt birebir ayni]
+   0x1400102F5 | 5D                     pop rbp                        [orig 0x1C9A, bayt birebir ayni]
+   --> CONNECTOR: E9 -> arena 0x1400101D8  = PARCA 10 basina ziplar
+
+PARCA 10  | arena=0x1400101D8  .maze RVA=0xB1D8  span=0x1D8..0x1E0 (8B)
+----------------------------------------------------------------------------------------------------
+   0x1400101D8 | E9 B0 01 00 00         jmp 0x14000b38d  ; -> 0x14000B38D <<< RET YAZILMADI: orijinal C3 (C3) yerine JMP cleanup
+   0x1400101DD | 90                     nop   [eslesme disi]
+   0x1400101DE | 90                     nop   [eslesme disi]
+   0x1400101DF | 90                     nop   [eslesme disi]
+
+Zincir: 10 parca, ret->cleanup swap: True
+
+====================================================================================================
+D) SENIN CE DUMP'INDAKI 3 SATIRIN KIMLIGI (arena base 0x140010000)
+====================================================================================================
+   arena 0x140010336: E9 CA FE FF FF 90 CONNECTOR (parca baglanti JMP'i)
+      hedef arena 0x140010205 -> PARCA 2 basi
+   arena 0x14001033C: 0F 85 AF FF FF FF KOSULLU DAL (orijinal jne - labirent hedefine fixup'li)
+      hedef arena 0x1400102F1 -> parca ici konum
+   arena 0x140010345: E9 36 FF FF FF 90 CONNECTOR (parca baglanti JMP'i)
+      hedef arena 0x140010280 -> PARCA 8 basi

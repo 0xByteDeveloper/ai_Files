@@ -1,0 +1,6 @@
+=== OUTPUT ===
+AUTOTEST OK score=30 frame=529 hwid=650945844 WON=1
+
+=== API CAGRILARI ===
+ExitProcessx1, GetCommandLineAx1, GetStdHandlex1, GetTickCountx529, VirtualAllocx1058, VirtualFreex1058, WriteFilex7
+=== SONUC: exit=0 error=yok ===

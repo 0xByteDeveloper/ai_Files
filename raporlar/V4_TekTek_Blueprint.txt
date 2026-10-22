@@ -1,0 +1,155 @@
+====================================================================================================
+V4 "TEK TEK" (STREAM) TASARIMI - MazeProtector ARENA-V3 -> ARENA-V4 blueprint
+Kullanicinin fikri: "hepsini ayni yere yazmak yerine tek tek"; opcode'lar struct olarak,
+sifreli baytlarla + RVA'li olanlar RVA'siyla grupsal. Bu dosya o fikrin motor-gercek tasarimidir.
+(Destekleyici veri: MovePlayer_Opcode_Struct.txt - 29 opcode'un gercek struct'i)
+====================================================================================================
+
+1) FIKRIN DEGERLENDIRMESI (net olayim)
+----------------------------------------------------------------------------------------------------
+DOGRU KISIMLAR (aynen uygulanir):
+ a) IR/struct fikri COK dogru. Motorun icinde zaten ayni struct var (MInsn: kind, targetRva,
+    ripTargetRva, ripOff, blobOff...). Senin fikrin = bunu DOSYA FORMATINA cikarmak: .maze'de
+    on-baglanmis span'ler yerine "sifreli opcode kayitlari + RVA tablosu" dursun. Kazanc:
+    - Runtime her kaydi BAGIMSIZ cozer -> akis (stream) mumkun olur. V3'te mumkun degildi cunku
+      span'ler birbirine E9'la dikilmisti, tek bir bag kopar.
+    - RVA'li komutlar (call IsWall, jne epilog) goveden AYRILIR (senin "grupsal yazma" fikrin):
+      govdede artik adres tasiyan bayt yok, fixup tamamen tablo surulu. V3'te 3 site vardi;
+      V4'te her kenar tabloda (sayisi artar ama hepsi tek formulle: disp -= delta).
+ b) Per-op sifreleme ("ff olayi"): dogru yon; duz 0xFF maske trivyaldir, index-tuzlu XOR minimum.
+    (Rapor D bolumunde 29 op'un gercek sifreli halleri + C struct dokumu var.)
+
+TUZAK (kritik!):
+ c) "Tek tek ayni yere yaz" DERKEN SILMEYI UNUTURSAK: op0'i yaz, op1'i yaz, ... op28'i yaz ->
+    arenda yine TAM fonksiyon oldu. Birikim (accumulation) senin itirazini cozmuyor.
+    COZUM = WIPE-BEHIND: her yeni parca yazilmadan onceki parca SIFIRLANIR. O zaman her an
+    arenada SADECE 1 parca (max 12 bayt) plaintext olarak vardir. Fonksiyonun tamami HICBIR
+    an HICBIR yerde bitisik olarak var olmaz.
+
+d) PDB kismi: dogru fikir ama dagitima baglanma. Kanit: elimizdeki MazeGame.pdb ESKI build -
+   icinde MovePlayer sembolu hic yok. Buna karsilik .pdata her x64 PE'nin icinde GOMULU
+   (RUNTIME_FUNCTION: base+end) ve proje zaten .gfn kaydi tutuyor; ikisi de 0x1C40 / 92 bayt
+   verdi, capraz dogrulandi. Kural: .pdata birincil kaynak, .gfn isim, PDB varsa bonus.
+
+2) V4 ARENA-STREAM MOTORU (MazeProtector.h'ye eklenecekler, V3 yapisini koruyarak)
+----------------------------------------------------------------------------------------------------
+2.1 PARCA KESIM KURALI DEGISIR (tek hard gereklilik):
+    ESKI: komutlari boyut'a gore kes (chunkMax=12); connector ile bagla.
+    YENI: + "her ic dal hedefi bir PARCA BASI olmali" (jne op#26 -> op26'dan kes).
+    MovePlayer icin yeniden kesim (11 parca):
+      c1[op0-2] c2[op3-5] c3[op6-9] c4[op10-12] c5[op13-15] c6[op16-18]
+      c7[op19-20] c8[op21-23] c9[op24-25] c10[op26-27] c11[op28]
+      (op28 = ret -> E9 cleanup; c9/c10 ayri cunku jne'nin hedefi op26)
+    Slot boyutu = maxGovde(12) + connector(5) = 17 -> 24 bayt tek slot.
+
+2.2 .maze YENI FORMATI ('MZE3' header, 0x40 bayt, V3 uyumlu sirada):
+    0x00 nBlocks     0x04 'MZE3'    0x08 anahtar(K)  0x10 entryRva
+    0x14 fnRva       0x18 fnSize    0x1C blockTblOff 0x20 decryptFlag(fallback)
+    0x24 encBytes    0x28 slotSize  0x2C nSites      0x30 sitesOff
+    0x34 imgSize     0x38 jmpSlot(u64)               0x3C edgeTblOff
+    BLOCK KAYDI (16 bayt x nBlocks) - senin MzOp struct'inin parca-boyutlu kardesi:
+      struct MzBlk { u32 encOff; u8 len; u8 pad[3]; u32 nSites; u32 siteFirst; u32 crc; }
+      - encOff : sifreli govde ofseti (.maze'de, Govde + tail-E9 birlikte sifreli)
+      - len    : sifreli bayt sayisi (govde+connector)
+      - siteFirst/nSites : bu parcaya ait fixup'larin araligi (RVA'lilarin GRUPSAL tablosu)
+      - crc    : tamamlama byte'i (anti-patch; asagida)
+    SITE KAYDI (8 bayt, "RVA'lilar grubu"):
+      struct MzSite { u32 blkOff; u8 kind; u8 pad[3]; u32 rvaOrMazeOff; }
+      kind 0: disp -= delta  (hedef = modul RVAs: call IsWall)
+      kind 1: disp -= delta  (hedef = .maze THUNK RVA: connector + jcc + cleanup->farewell)
+      (ikisinin formulu ayni: disp -= delta; fark sadece bilgi amacli)
+    EDGE/THUNK DIZISI (.maze'de PLAINTEXT, kenar basina 10 bayt):
+      mov r10d, <hedefParcaIndex>   ; 41 BA xx xx xx xx
+      jmp <stage>                   ; E9 rel32 (stub'a)
+      Kenarlar: 10 connector + 1 jce + 1 ret->cleanup(E9 farewell zaten var) = thunk'lar
+      THUNK kod bayti ICERMEZ (sadece index) -> plaintext durmasi kod sizdirirmaz;
+      V3'te zaten Gorsel olan CFG bilgisinin aynisini gosterir.
+
+2.3 STAGE ROUTINE (stub icinde paylasilan tek kopya, ~40 bayt asm):
+      stage:  ; giris: r10d = parca index, r12 = delta(arena-blob), rbx = .maze taban
+        rcx = slot (arena + slotOff)
+        rax = 0 /  mov [rcx],rax ; mov [rcx+8],rax ; mov [rcx+16],rax   ; WIPE-BEHIND (24B)
+        r8  = blkTbl + r10d*16 ; r11 = encOff ; ecx = len
+        r9 = .maze+encOff ; rdx = K
+      cpIn: mov rax,[r9] ; xor rax,rdx ; mov [rcx],rax ; r9+=8 ; rcx+=8 ; ecx-=8 ; jnz cpIn
+        ; parcaya ait siteleri uygula
+        r8 = sites + siteFirst*8 ; ecx = nSites
+      fx: r11 = [r8].blkOff + slot ; eax=[r11] ; eax -= r12d ; [r11]=eax ; r8+=8 ; ecx-=8 ; jnz fx
+        ; tail-E9'un hedefi = slot konumuna gore degisir -> connector disp'i slot-bazli yamala
+        ; (tail E9'un disp'i build'de THUNK RVA'sina yazildi -> disp -= delta formulu zaten kapsar)
+        crc kontrol (opsiyonel): cofre byte esit degilse -> jmp farewellClean
+        jmp slot
+      Not: ilk parca icin stub'un girisi zaten stage(0) yapar; jmpSlot yerine dogrudan
+      "mov r10d, 0; jmp stage" cagrilir (V3'teki jmpSlot dolayliligi kaldirilir - thread
+      yarisi da ortadan kalkar, her cagri kendi arenasinda kendi slotunu kurar).
+
+2.4 AKIS ORNEGI (MovePlayer, duvar yok senaryosu):
+    trambolin -> stub: VirtualAlloc(32B sayfa) -> stage(c1) -> c1 calisir, tail-E9 -> thunk(c2)
+    -> stage: slot SIFIRLANIR, c2 cozulur, jmp -> ... -> c6 (call IsWall arena slotunda:
+       donus adresi = slot icinde call'dan sonrasi = tail-E9 -> thunk(c7))
+    -> c7: jne ALINMADI (duvar yok) -> tail-E9 -> thunk(c8) -> c8 cozulur (px/ny yazimi)
+    -> thunk(c9) -> c9, c10, c11(E9 cleanup) -> farewell(.maze plaintext): memset yok
+       (slot zaten tek, VirtualFree MEM_RELEASE tum sayfayi geri verir) -> ret.
+    DUVAR VAR senaryosu: jne ALINIR -> thunk(c10) -> c8 HIC COZULMEZ o cagri icin.
+    == Kazanc: V3'te 248 baytin TAMAMI her cagri cozuluyordu; V4'te alinmayan yol cagri
+       basina sifreli kalir (cold-path lazy decrypt - bedava guvenlik).
+
+2.5 Fallback (VirtualAlloc 8 deneme bitti) = V3'YDI AYNI: YERINDE mod, decrypt-once flagi.
+    Cleanup/farewell = V3 ile birebir ayni (EmitArenaCleanup/Farewell degismez).
+
+3) GOD-TIER KATMANLAR (sirali oncelik; ilk 3 V4'e dahil edilmeli)
+----------------------------------------------------------------------------------------------------
+ G1 SLOT RASTGELELESTIRME (bedava, onerilen): slot = arena + RNG(0..sayfa-32) her cagri baska.
+    Kenarlar thunk'larindan gectigi icin slot konumu SERBEST. Ayni parca her cagride baska
+    adreste -> "dump al, sonraki cagriyla esle" calismaz.
+ G2 CRC-8 tamamlama (parca basina 1 bayt, sifreli kayitla gelir): stage sirasinda eslesmezse
+    farewellClean'a dal (VirtualFree + rax=0 ret). Anti-patch: arenadaki cözulmus parca
+    degistirilirse bir sonraki stage'de/veya aninda yakalanir.
+ G3 DECOY ENJEKSIYONU: stage baslangicinda %30 ihtimalle slot'a DECCEPTIVE parca cozulur, sonra
+    gercek parca: CE'de adim adim gezen kisiye gurultu (V3 yemlerinin runtime kardesi).
+ G4 PER-CALL SUBKEY (maliyeti dusuk, surekli degil): K'yi dogrudan degistiremeyiz (dosya statik)
+    ama stage XOR'unu 8-bayt blok basina kb[i&7] ^ (r10d*0x5B) ile kariştirebiliriz -> sifreli
+    kayitlari da ayni maskeyle uretiriz (build zamaninda). Ayni parcanin dosya-baytlari
+    ayni kalir, cozme maskeleme tek formulle iptal olur; kazanc sinirli -> G1 varsa istege bagli.
+ G5 TF/VEH GERCEK KOMUT-KOMUT (megaprotector seviyesi): her komuttan sonra Trap Flag -> #DB ->
+    VEH handler siradaki komutu cozer, oncekini siler. ~10k+ döngü/komut = 92 bayt fonksiyonda
+    ~300k+ döngü/cagri + manual-map icinde VEH kurulumu (KiUserExceptionDispatcher yamasi).
+    Tavsiye: oyun dongusu icin HAYIR; cok kritik baska fonksiyon icin ayri mod olarak.
+ G6 MINI-VM (teori katmani): opcod'lar native x86 olarak HIC materialize edilmez, stub-VM
+    yorumlar. Gercek god-tier ama x86 yorumlayicisini asm ile yazmak = ayri proje; V4 +
+    G1-G3 pragmatik tavan.
+
+4) GUVENLIK KARSILASTIRMASI (MovePlayer, gercek sayilar)
+----------------------------------------------------------------------------------------------------
+ Metrik                                  V3 ARENA (batch)        V4 STREAM (tek tek)
+ ----------------------------------------------------------------------------------------------------
+ Her an bitisik plaintext                248 bayt (tam fonksiyon) max 24 bayt (1 parca)
+ Cozulen toplam / cagri                  248 bayt (hepsi)         sadece calisan yol (~228,
+                                                                  duvar varsa ~215 - c8 cozulmez)
+ Arena boyutu                            1113 bayt                32 bayt
+ Soğuk yol sifreli kalinmi               HAYIR (hepsi cozulur)    EVET (alinmayan dal cozulmez)
+ Cagri-basi adres degiskenligi           arena taban (ASLR benzeri) arena taban + slot konumu
+ Dump -> tam fonksiyon elde etme         1 dump yeter             YETERSIZ: dump'da parcalar
+                                                                  eksik; tamami icin surekli
+                                                                  izleme + elle birlestirme
+ Statik analiz (.maze diskte)            sifreli                  sifreli (V3 ile ayni)
+ Calisma maliyeti / cagri                1 kopya + 3 fix          ~11 stage (her biri ~25 komut)
+                                                                  ~+300 komut - tus basimi icin ~0
+ ----------------------------------------------------------------------------------------------------
+ Kalan risk (dürüst): CPU her komutu eninde sonunda arena'da calistirir; birebir
+ tek-adim izleme (CE trace) komutlari teker teker gorur. Bu TAMAMEN engellenemez
+ (kod calismak zorunda); V4'un kazanci = "tek dump ile tam fonksiyon"u imkansiz kilmak
+ + izleme gurultusunu artirmak. Ilac istenirse G5/G6 katmanlari.
+
+5) UYGULAMA PLANI (siradaki is)
+----------------------------------------------------------------------------------------------------
+ 1. MazeProtector.h: Options.stream flagi; chunk kesimine "branch target = parca basi" kurali
+    ([4] PARCALAMA); EmitStreamStub + MzBlk/MzSite tablolari ([6]-[7]); [11.5] dogrulamaya
+    "stage simulasyonu" ekle (slot=0 varsay, her parca icin wipe+copy+fix komutlari capstone'la
+    tek tek denetle).
+ 2. mp_driver.cpp: MP_STREAM=1 ortam degiskeni -> ArenaV4_TekTek EXE uretimi.
+ 3. Test: unicorn_run.py (MP_NOTRACE=1, auto arg) baseline/arena/stream ciktilari esit mi;
+    duvar-var/duvar-yok iki yol; VirtualAlloc fail fallback; CE kontrol listesi (stub adimla,
+    slot rax'i, c8'in cozulmedigini dogrula).
+ 4. Cikti dosyalari: MazeGame_Sifreli_ArenaV4_Stream_MoveOnly.exe + MazeMap_V4.txt.
+====================================================================================================

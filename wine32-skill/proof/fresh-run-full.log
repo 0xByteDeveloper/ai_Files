@@ -1,0 +1,30 @@
+=== 0/9 ortam kontrolü ===
+OS: Debian GNU/Linux 13 (trixie) | suite=trixie | HOME=/tmp/wtest | ld.so hedefi=/tmp/wtest/l/ld.so
+=== 2/9 root'suz paketler (libc6:i386, libgcc-s1:i386, patchelf, qemu-user) ===
+=== 1/9 apt update (kullanıcı ağacı, trixie) ===
+W: Target Packages (main/binary-all/Packages) is configured multiple times in /tmp/wtest/aptroot/etc/apt/sources.list:1 and /tmp/wtest/aptroot/etc/apt/sources.list:2
+Get:1 http://deb.debian.org/debian trixie/main i386 libgcc-s1 i386 14.2.0-19 [88.2 kB]
+Get:2 http://deb.debian.org/debian trixie/main i386 libc6 i386 2.41-12+deb13u4 [2722 kB]
+Get:3 http://deb.debian.org/debian trixie/main amd64 patchelf amd64 0.18.0-1.4 [99.7 kB]
+Get:4 http://deb.debian.org/debian trixie/main amd64 qemu-user amd64 1:10.0.13+ds-0+deb13u1 [71.1 MB]
+Get:5 http://deb.debian.org/debian trixie/main amd64 qemu-user-static amd64 1:10.0.13+ds-0+deb13u1 [77.4 kB]
+i386 loader: /tmp/wtest/l/ld.so (216K)
+=== 3/9 Kron4ek Wine 11.20-x86 indiriliyor (NOT: amd64-wow64 KULLANILMAZ — overcommit ENOMEM) ===
+=== 4/9 patchelf: ELF32'lere interpreter + rpath ===
+patched: 47 ELF32
+=== 5/9 exec-zinciri sarmalayıcıları (native i386 exec'i qemu'ya kilitler) ===
+=== 6/9 launcher: $HOME/.local/bin/wine32 (+ $HOME/wine32) ===
+launcher hazır: wine32 (PATH'e ~/.local/bin ekleyin)
+=== 7/9 WINEPREFIX başlatma (WINEARCH=win32) ===
+prefix hazır: /tmp/wtest/.wine32
+=== 8/9 root'suz mingw-w64-i686 cross-compiler ===
+=== 1/9 apt update (kullanıcı ağacı, trixie) ===
+W: Target Packages (main/binary-all/Packages) is configured multiple times in /tmp/wtest/aptroot/etc/apt/sources.list:1 and /tmp/wtest/aptroot/etc/apt/sources.list:2
+Get:1 http://deb.debian.org/debian trixie/main i386 mingw-w64-common all 12.0.0-5 [5792 kB]
+Get:2 http://deb.debian.org/debian trixie/main i386 mingw-w64-i686-dev all 12.0.0-5 [4180 kB]
+Get:3 http://deb.debian.org/debian trixie/main amd64 binutils-mingw-w64-i686 amd64 2.44-3+12+b1 [2859 kB]
+Get:4 http://deb.debian.org/debian trixie/main amd64 gcc-mingw-w64-base amd64 14.2.0-19+27+b1 [194 kB]
+Get:5 http://deb.debian.org/debian trixie/main amd64 gcc-mingw-w64-i686-win32 amd64 14.2.0-19+27+b1 [37.2 MB]
+Get:6 http://deb.debian.org/debian trixie/main amd64 gcc-mingw-w64-i686-win32-runtime amd64 14.2.0-19+27+b1 [12.4 MB]
+=== 9/9 uçtan uca doğrulama ===
+/home/z/my-project/skills/wine-32bit-runner/scripts/setup-wine32.sh: line 225: LD_LIBRARY_PATH: unbound variable

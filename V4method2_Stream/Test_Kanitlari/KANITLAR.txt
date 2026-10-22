@@ -1,0 +1,14 @@
+KANIT OZETI (unicorn olcumleri - komutlar dosyalarda; EXE'ler GUNCEL motor (tablo CRC-8)
+ile yeniden derlendi ve TUM kanitlar o EXE'ler uzerinden yeniden olculdu):
+  Tam oyun              : score=30 frame=529 WON=1 exit=0 (baseline ile birebir)
+  G1  slot cesitliligi  : 64 benzersiz slot adresi 0x3D0..0x7C0 (test_Stream_proofs.txt)
+  G2  anti-patch        : 1 sifreli bayt cevrildi -> exit=222 (0xDE) fail-closed PASS
+                          (mp_antipatch_test.py <EXE> ile yeniden uretilebilir)
+  G3  decoy             : %25 ihtimalle stage basinda 16-24B yem cozulur, wipe ile silinir
+  Cold-path (duvar-var) : 20000 cagri, IsWall=1 zorlandi -> pid7=0 pid8=0 stage
+                          (px/ny parcasi FIZIKSEL olarak HIC decrypt edilmedi)
+                          dosya: Stream_coldpath_duvar_var_pid78_yok.txt
+  Cold-path (duvar-yok) : 529 cagri, 10 parca x 529 stage (min=max - yol acik)
+  Fallback YERINDE mod  : MP_FAIL_ALLOC=8 -> score=30 WON=1 exit=0
+                          (ilk 8 alloc gecer, oyundaki arena alloc'lari reddedilir
+                           -> 529 yerinde cagri, crash yok)

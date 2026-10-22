@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Kaynak Dosyalar">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;c++;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Baslik Dosyalari">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd</Extensions>
+    </Filter>
+    <Filter Include="Baslik Dosyalari\Cekirdek Motor">
+      <UniqueIdentifier>{a1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Baslik Dosyalari\Loader">
+      <UniqueIdentifier>{f1e2d3c4-b5a6-9788-9900-aabbccddeeff}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Baslik Dosyalari\Koruma">
+      <UniqueIdentifier>{a7c3f8e2-1d4b-4e9f-8b2c-3f5a6d7e8c90}</UniqueIdentifier>
+    </Filter>
+      <ClInclude Include="LoaderSelfTest.h">
+      <Filter>Header Dosyaları</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="main.cpp">
+      <Filter>Kaynak Dosyalar</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="stdafx.h">
+      <Filter>Baslik Dosyalari</Filter>
+    </ClInclude>
+    <ClInclude Include="globals.h">
+      <Filter>Baslik Dosyalari\Cekirdek Motor</Filter>
+    </ClInclude>
+    <ClInclude Include="InstanceManager.h">
+      <Filter>Baslik Dosyalari\Cekirdek Motor</Filter>
+    </ClInclude>
+    <ClInclude Include="PEManualMapper.h">
+      <Filter>Baslik Dosyalari\Loader</Filter>
+    </ClInclude>
+    <ClInclude Include="MazeProtector.h">
+      <Filter>Baslik Dosyalari\Koruma</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>
