@@ -140,3 +140,24 @@
 - V4 kanıt scriptleri: `python3 Test_Kanitlari/mp_v4_proofs.py` (MP_FORCE_WALL=1 ile duvar modu)
 - VMProtect kaynak: `/home/z/my-project/work/universalObfus/vmp/` (zip'ten açılı)
 - GitHub: `0xByteDeveloper/ai_Files` (bu repo — her şeyin kalıcı kopyası)
+
+---
+
+## 9. V4.1 EVRENSEL DOĞRULAMA GÜNCELLEMESİ (2026-10-22)
+
+**Görev:** V4M1/M2'nin her şeyde çalışması (32-bit, DLL, PDB'siz, bağımsız program, mini oyun).
+
+**Motor V4.1'e güncellendi — 4 kritik bug düzeltildi:**
+1. **IAT-Import ekleme:** IAT'de VirtualAlloc/VirtualFree/ExitProcess yoksa motor reddediyordu → `EnsureIatImports()` (.mpimp section + ikinci kernel32 descriptor) + `GrowAppendSection()` (3 katmanlı section ekleme: normal → header-growth → son-section büyütme; UPX-unpack PE'ler için)
+2. **RIP-rel "disp=son 4 bayt" hatası:** `add/mov [rip+X], imm` formlarında yama 1 bayt kayıyor → `CalcRipDispOff` tersten arama + `applyRel32V4` nextIP bazlı
+3. **Son komut ret zorunluluğu:** mingw -O2 fonksiyonları fonksiyon-içi join noktasına tail-JMP ile bitiriyor → kabul edildi (K_BR/K_EXPJMP)
+4. **CFG fonksiyon-boyutu + MP_RVA manuel mod:** .gfn olmayan yabancı programlarda RVA elle/CFG ile
+
+**Kanıtlar (V4Dogrulama.zip):**
+- T1 x64 kendi programım: 6/6 fonksiyon, çıktı birebir eşit (diff=0)
+- T4 strip'li (PDB yok): 6/6 + eşit
+- T5 MiniOyun TinySnake (internetten, UPX'li → unpack, PDB'siz): GameLoop (RVA 0x1158, 696B) korundu, 83 JMP, açılış ekranı birebir, crash yok
+- T2 32-bit: wine32 PASS (yürütme kanıtlı); x86 emitter (EmitStreamStageX86/EmitStreamStubX86 + reloc-fixup site) SONRAKİ BÜYÜK İŞ — plan: PID=ecx, conv=ebx, PEB fs:[0x30], stdcall VAlloc, u32 delta/anahtar, x86 absolute-VA fixup siteleri
+- wine64 (Kron4ek) bu sandbox'ta preloader SIGSEGV — x64 kanıtları unicorn ile (proje metodolojisi); 32-bit'te gerçek yürütme wine32
+
+**Önemli komutlar:** MP_FN=Ad MP_RVA=0x1158 ./mp_driver in.exe out.exe map.txt stream | MP_CFG_DEBUG=1 | unicorn: MP_RVAFREQ=1 MP_MAXINSN=8000000 (yabancı PE'de "hangi fonksiyon çalışıyor")
