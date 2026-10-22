@@ -1,0 +1,1 @@
+seed=1000: OK frames=1 kb=924 getch=921 alloc=0
