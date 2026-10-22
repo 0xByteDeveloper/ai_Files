@@ -1,19 +1,21 @@
 // ============================================================================
-//  MiniGameHost2.c - T3 DLL testi v2 (aciklayici surum)
-//  Ne yapar:
-//   1) MiniGameDll.dll          (ORIJINAL) LoadLibraryA ile yukler -> 40 hamle
-//      testi kosar, FNV hash'i alir
-//   2) MiniGameDll_korumali.dll (MAZEPROTECTOR IP ile sifreli) ayni testi
-//      kosar, hash'i alir
-//   3) Iki hash'i KARSILASTIRIR -> "ESLESME=TAM" yazdirir
-//   4) Cikmadan once Enter bekler (cift tikla acilan pencere kapanmaz)
-//  Ciktilardaki degerler:
-//   MODn       = DLL'in yuklendigi temel adres (HMODULE) - DLL GERCEKTE yuklendi
-//   EXP=n/4    = GetProcAddress ile bulunan export sayisi
-//   MOVEHn     = 40 hamle + 2 LCG cagrisinin FNV-1a hash'i (sonuca gomulu)
-//   SCORE/X/Y  = oyun durumunun son hali (belirleyici akis)
-//   LCGn       = son LCG degeri
-//   ESLESME    = TAM (hash'ler ayni -> korumali DLL birebir ayni davrandi)
+//  MiniGameHost2.c - T3 DLL testi v3 (uc-DLL karsilastirmali surum)
+//  ----------------------------------------------------------------------------
+//  NE YAPAR:
+//   [1/4] MiniGameDll.dll               (ORIJINAL)  -> 40 hamle testi, FNV hash
+//   [2/4] MiniGameDll_korumali_ip1.dll  (IP1)       -> ayni test
+//   [3/4] MiniGameDll_korumali_ip2.dll  (IP2)       -> ayni test
+//   [4/4] KARSILASTIRMA: h1==h2==h3 -> ESLESME=TAM
+//  NOT: Eski paketteki MiniGameDll_korumali.dll (129KB) TUR-2 BETA donemine
+//  aitdi ve bozuktu (0xC000007B Bad Image). O dosya kaldirildi; yerine IP1
+//  kopyasi kondu. Bu host artik yalnizca ip1/ip2 dosyalarini yukler.
+//  ----------------------------------------------------------------------------
+//  CIKTI ALANLARI:
+//   DLLn   : YUKLENDI base=0x.........  (LoadLibraryA basarili)
+//   EXPORT : 4 = MM_Move/MM_Lcg/MM_Score/MM_Reset hepsi bulundu
+//   MOVEHn : 40 hamle + 2 LCG cagrisinin FNV-1a hash'i (SONUC PARMAK IZI)
+//   SCORE/X/Y/LCGn : oyun durumu (belirleyici akisin son hali)
+//   ESLESME: TAM -> korumali DLL'ler orijinal ile BIREBIR ayni davrandi
 // ============================================================================
 #include <stdint.h>
 typedef uint8_t u8; typedef uint32_t u32; typedef uint64_t u64;
@@ -23,6 +25,7 @@ __attribute__((stdcall)) extern int __stdcall ReadFile(void* h,void* b,u32 l,u32
 __attribute__((stdcall)) extern void __stdcall ExitProcess(u32 c);
 __attribute__((stdcall)) extern void* __stdcall LoadLibraryA(const char* n);
 __attribute__((stdcall)) extern void* __stdcall GetProcAddress(void* m,const char* n);
+__attribute__((stdcall)) extern u32 __stdcall GetLastError(void);
 
 static u32 slen(const char* s){u32 n=0; while(s[n])n++; return n;}
 static void putsRaw(const char* s){u32 w; WriteFile(GetStdHandle((u32)-11),s,slen(s),&w,0);}
@@ -42,7 +45,12 @@ typedef void (__stdcall *FnReset)(void);
 // Bir DLL'i yukle + 40 hamle testi kosar; hash doner (0 = yukleme hatasi)
 static u32 TestDll(const char* path, const char* tag){
     void* mod = LoadLibraryA(path);
-    if(!mod){ putsRaw(tag); putsRaw(": YUKLEME HATASI!\n"); return 0; }
+    if(!mod){
+        putsRaw(tag); putsRaw(": YUKLEME HATASI! GetLastError=");
+        putsHex("",GetLastError());
+        putsRaw("  (0x7B=193/BadImage 0x7E=126/bulunamadi 0xC1=193/zaten var)\n");
+        return 0;
+    }
     FnMove mv; FnLcg lc; FnScore sc; FnReset rs;
     mv=(FnMove)GetProcAddress(mod,"MM_Move");
     lc=(FnLcg)GetProcAddress(mod,"MM_Lcg");
@@ -70,19 +78,23 @@ static u32 TestDll(const char* path, const char* tag){
 }
 
 int main(void){
-    u32 h1,h2;
-    putsRaw("=== T3-DLL TESTI v2 (MazeProtector IP) ===\n");
-    putsRaw("[1/3] ORIJINAL DLL testi\n");
+    u32 h1,h2,h3;
+    putsRaw("=== T3-DLL TESTI v3 (MazeProtector IP, uc DLL) ===\n");
+    putsRaw("[1/4] ORIJINAL DLL testi\n");
     h1=TestDll("MiniGameDll.dll","DLL1");
-    putsRaw("[2/3] KORUMALI DLL testi (govde .text'te sifreli)\n");
-    h2=TestDll("MiniGameDll_korumali.dll","DLL2");
-    putsRaw("[3/3] KARSILASTIRMA\n");
-    if(h1 && h2 && h1==h2){
-        putsRaw("SONUC: ESLESME=TAM (korumali DLL orijinal ile birebir ayni davrandi)\n");
-        putsRaw("MANA: DLL yuklendi, 4 export bulundu, 42 cagri, sifreli\n");
+    putsRaw("[2/4] KORUMALI DLL testi (IP1: yerinde sifreli, sabit anahtar)\n");
+    h2=TestDll("MiniGameDll_korumali_ip1.dll","DLL2");
+    putsRaw("[3/4] KORUMALI DLL testi (IP2: her cagrida yeni rastgele anahtar)\n");
+    h3=TestDll("MiniGameDll_korumali_ip2.dll","DLL3");
+    putsRaw("[4/4] KARSILASTIRMA\n");
+    if(h1 && h2 && h3 && h1==h2 && h2==h3){
+        putsRaw("SONUC: ESLESME=TAM (IP1 ve IP2 DLL'leri orijinal ile birebir ayni davrandi)\n");
+        putsRaw("MANA: DLL yuklendi, 4 export bulundu, 2x42 cagri, sifreli\n");
         putsRaw("      fonksiyonlar yerinde cozulup calisti, cokme YOK.\n");
     } else {
         putsRaw("SONUC: ESLESME=YOK (hata - yukaridaki satirlara bak)\n");
+        if(!h2) putsRaw("NOT: DLL2 yuklenemedi (IP1 DLL dosyasi bozuk/kayip?)\n");
+        if(!h3) putsRaw("NOT: DLL3 yuklenemedi (IP2 DLL dosyasi bozuk/kayip?)\n");
     }
     putsRaw("\n[KAPATMAK ICIN ENTER]\n");
     { u8 b[16]; u32 r; ReadFile(GetStdHandle((u32)-10),b,sizeof(b),&r,0); }

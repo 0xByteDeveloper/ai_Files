@@ -155,10 +155,14 @@ static bool SplitHead(Core& c, u32 fnRva, u32 maxLen, std::vector<HeadInsn>& out
 }
 
 // ---- proxy uretimi ---------------------------------------------------------
+// rvaToProxyOff: her head komutunun proxy icindeki baslangic ofseti
+// (head-region reloc'lari proxy'ye tasimak icin - V4.3.1)
 static void BuildProxy(const std::vector<HeadInsn>& head, u32 fnRva, u32 headLen,
-                       u32 proxyRva, std::vector<u8>& px, Report& rep) {
+                       u32 proxyRva, std::vector<u8>& px, Report& rep,
+                       std::map<u32,u32>* rvaToProxyOff = nullptr) {
     px.clear(); px.reserve(headLen + 8 * head.size() + 16);
     for (auto& h : head) {
+        if (rvaToProxyOff) (*rvaToProxyOff)[h.rva] = (u32)px.size();
         u32 cur = proxyRva + (u32)px.size();
         i64 delta = (i64)cur - (i64)h.rva;
         if (h.isRip) {
@@ -204,7 +208,8 @@ static void BuildProxy(const std::vector<HeadInsn>& head, u32 fnRva, u32 headLen
 // 0x00 magic | 0x04 depth | 0x08 lock | 0x0C state | 0x10 fnRva | 0x14 fnSize
 // 0x18 headLen | 0x1C seed | 0x20 bodyLen | 0x24 method | 0x28 sideCount
 // 0x2C sideMax | 0x30..0xB0 side[16] (stride 8) | 0xB0 bodyCrc | 0xB8 prefBase
-// 0xC0 relocListRva | 0xC4 relocCount | 0xC8 relocApplied
+// 0xC0 relocListRva | 0xC4 relocCount | 0xC8 relocApplied | 0x94 adjScratch
+// (0x94: decrypt-sonrasi +delta gecisinin 1 kez kosulmasini saglayan bayrak)
 static const u32 CB_SIZE  = 0xD0;
 static const u32 CB_MAGIC = 0x35495A4Du; // 'MZI5'
 
@@ -220,7 +225,8 @@ static void EmitHandlerX64(Asm& a, u32 blobRva) {
     a.j32(0x85, "skipdec");                  // jne skipdec (nested: zaten plain)
     a.hx("41 83 7B 0C 01");                  // cmp dword [r11+0x0C], 1 (state==plain?)
     a.j32(0x85, "dodec");                    // jne dodec
-    // --- recovery: plain govdeyi CB.seed ile geri sifrele ---
+    // --- recovery: plain govdeyi CB.seed ile geri sifrele (NOT: recovery
+    //     yolunda relocApplied=0 oldugu icin +delta tekrar KOSMAZ) ---
     a.hx("51 52 41 50 41 51 56 57");         // push rcx,rdx,r8,r9,rax,rsi,rdi
     a.picBase64(blobRva);                    // rax = imgBase
     a.hx("41 8B 7B 10");                     // mov edi, [r11+0x10]  (fnRva)
@@ -241,6 +247,7 @@ static void EmitHandlerX64(Asm& a, u32 blobRva) {
     a.hx("41 83 7B 2C 00");                  // cmp dword [r11+0x2C], 0 (relocApplied)
     a.j8(0x74, "skipadj");                   // je skipadj
     a.hx("41 C7 43 2C 00 00 00 00");         // relocApplied = 0
+    a.hx("41 C7 83 94 00 00 00 01 00 00 00"); // adjScratch = 1 (adjust calisti) <- V4.3.1, disp32!
     a.hx("48 89 F2");                        // mov rdx, rsi
     a.hx("49 2B 53 70");                     // sub rdx, [r11+0x70]  (delta = imgBase - prefBase)
     a.hx("45 8B 4B 7C");                     // mov r9d, [r11+0x7C]  (count)
@@ -264,6 +271,30 @@ static void EmitHandlerX64(Asm& a, u32 blobRva) {
     a.hx("45 8B 43 1C");                     // mov r8d, [r11+0x1C]
     a.call("xorloop");                       // govde ^= keystream -> TAM orijinal
     a.hx("41 C7 43 0C 01 00 00 00");         // state = plain
+    // --- V4.3.1: PLAINTEXT +delta gecisi ---
+    // Gerçek relocation'da (DLL base cakismasi): loader sifreli govdeye +=delta
+    // uygular -> biz -delta geri alip cozeriz -> pointer'lar prefBase'li kalir.
+    // Cözülmüs plaintext uzerinde +=delta ile gercek base'e tasinir (1 kez).
+    a.hx("41 83 BB 94 00 00 00 00");         // cmp dword [r11+0x94], 0 (adjScratch)
+    a.j8(0x74, "skipadd");                   // adjust calismadiysa dokunma
+    a.hx("41 C7 83 94 00 00 00 00 00 00 00");// adjScratch = 0 (cift-kosma kilidi)
+    a.hx("48 89 F2");                        // mov rdx, rsi
+    a.hx("49 2B 53 70");                     // sub rdx, [r11+0x70] (delta)
+    a.hx("48 85 D2");                        // test rdx, rdx
+    a.j8(0x74, "skipadd");                   // delta=0 -> islem yok
+    a.hx("45 8B 4B 7C");                     // mov r9d, [r11+0x7C] (count)
+    a.hx("45 85 C9");                        // test r9d, r9d
+    a.j8(0x74, "skipadd");
+    a.hx("49 8B 7B 78");                     // mov rdi, [r11+0x78] (listRva)
+    a.hx("48 01 F7");                        // add rdi, rsi (listVA)
+    a.L("addloop");
+    a.hx("8B 07");                           // mov eax, [rdi] (rva)
+    a.hx("48 01 F0");                        // add rax, rsi (addr)
+    a.hx("48 01 10");                        // add qword [rax], rdx (+= delta, plaintext)
+    a.hx("48 83 C7 04");                     // add rdi, 4
+    a.hx("41 FF C9");                        // dec r9d
+    a.j8(0x75, "addloop");
+    a.L("skipadd");
     a.hx("5F 5E 58 41 59 41 58 5A 59");      // pop rdi,rsi,rax,r9,r8,rdx,rcx
     a.L("skipdec");
     // --- realRet -> side[] ; return-slot YERINDE degistir (ABI-TAM) ---
@@ -356,6 +387,7 @@ static void EmitHandlerX86(Asm& a, u32 blobRva) {
     a.j32(0x85, "skipdec");
     a.hx("83 7B 0C 01");                     // cmp dword [ebx+0x0C], 1
     a.j32(0x85, "dodec");
+    // (x86 recovery yolu: relocApplied=0 -> +delta tekrar kosmaz)
     // recovery
     a.hx("60 9C");                           // pushal; pushfd
     a.hx("89 F7");                           // mov edi, esi
@@ -372,6 +404,7 @@ static void EmitHandlerX86(Asm& a, u32 blobRva) {
     a.hx("83 7B 2C 00");                     // cmp dword [ebx+0x2C], 0 (relocApplied)
     a.j8(0x74, "skipadj");
     a.hx("C7 43 2C 00 00 00 00");            // relocApplied = 0
+    a.hx("C7 83 94 00 00 00 01 00 00 00");   // adjScratch = 1 (adjust calisti) <- V4.3.1, disp32!
     a.hx("89 F0");                           // mov eax, esi
     a.hx("2B 43 70");                        // sub eax, [ebx+0x70]  (delta, prefBase low32)
     a.hx("8B 4B 7C");                        // mov ecx, [ebx+0x7C]  (count)
@@ -393,6 +426,28 @@ static void EmitHandlerX86(Asm& a, u32 blobRva) {
     a.hx("8B 43 1C");                        // mov eax, [ebx+0x1C]
     a.call("xorloop");                       // sifre coz -> TAM orijinal
     a.hx("C7 43 0C 01 00 00 00");            // state = plain
+    // --- V4.3.1: PLAINTEXT +delta gecisi (x86) ---
+    a.hx("83 BB 94 00 00 00 00");            // cmp dword [ebx+0x94], 0 (adjScratch)
+    a.j8(0x74, "skipadd");                   // adjust calismadiysa dokunma
+    a.hx("C7 83 94 00 00 00 00 00 00 00");   // adjScratch = 0 (cift-kosma kilidi)
+    a.hx("89 F0");                           // mov eax, esi
+    a.hx("2B 43 70");                        // sub eax, [ebx+0x70] (delta)
+    a.hx("89 C2");                           // mov edx, eax <- DELTA EDX'TE! (V4.3.1 duzeltme:
+    a.hx("85 D2");                           // test edx, edx  -- addloop EAX'i scratch olarak
+    a.j8(0x74, "skipadd");                   //   kullaniyor; delta EAX'te kalirsan EDX'te
+    a.hx("8B 4B 7C");                        //   xorloop'tan kalan cope toplar!)
+    a.hx("85 C9");                           // test ecx, ecx
+    a.j8(0x74, "skipadd");
+    a.hx("8B 7B 78");                        // mov edi, [ebx+0x78] (listRva)
+    a.hx("01 F7");                           // add edi, esi (listVA)
+    a.L("addloop");
+    a.hx("8B 07");                           // mov eax, [edi] (rva)
+    a.hx("01 F0");                           // add eax, esi (addr)
+    a.hx("01 10");                           // add dword [eax], edx (+= delta, plaintext)
+    a.hx("83 C7 04");                        // add edi, 4
+    a.hx("49");                              // dec ecx
+    a.j8(0x75, "addloop");
+    a.L("skipadd");
     a.hx("9D 61");                           // popfd; popal
     a.L("skipdec");
     // realRet -> side[] ; return-slot yerinde degistir
@@ -547,6 +602,7 @@ inline bool Build(Core& c, const Options& optIn, Report& rep) {
     rep.bodyCrc = Crc32(&mem.data[rep.fnRva + rep.headLen], rep.bodyLen);
 
     // ---- govde icindeki RELOC'lari topla (reloc-guvenli koruma) ----
+    std::vector<PEFile::RelocEntry> headRelocs;   // V4.3.1: proxy'ye tasinacaklar
     std::vector<u8> relocList;
     {
         std::map<u32, u8> rel;   // rva -> size
@@ -564,11 +620,19 @@ inline bool Build(Core& c, const Options& optIn, Report& rep) {
             relocList.push_back(u8(rva >> 16)); relocList.push_back(u8(rva >> 24));
         }
         // bas bolgesindeki reloc'lari PE'den CIKAR (trambolin kismen +delta
-        // almasin); proxy disp'leri RVA-tabanli oldugu icin relocation'dan
-        // bagimsizdir, bas bolgesinde deger yok (tramp+CC)
+        // almasin). V4.3.1: silinen kayitlar KAYBOLMAZ - head komutunda mutlak
+        // adres (x86 [abs]) varsa proxy kopyasinda yasiyor -> reloc kaydi
+        // proxy icindeki yeni ofise REWRITE edilir (loader proxy'yi dogru
+        // base'e relocate eder). Eski kod burada tamamen siliyordu ->
+        // cakisan base'de (gercek relocation) proxy'de bayat VA kalirdi.
         pe.relocs.erase(std::remove_if(pe.relocs.begin(), pe.relocs.end(),
-            [&](const PEFile::RelocEntry& r) { return r.rva >= rep.fnRva && r.rva < rep.fnRva + rep.headLen; }),
+            [&](const PEFile::RelocEntry& r) {
+                if (r.rva >= rep.fnRva && r.rva < rep.fnRva + rep.headLen) { headRelocs.push_back(r); return true; }
+                return false;
+            }),
             pe.relocs.end());
+        if (!headRelocs.empty())
+            rep.warnings.push_back("Head bolgesinde " + std::to_string(headRelocs.size()) + " reloc -> proxy'ye tasinacak (V4.3.1)");
         if (rep.relocCount)
             rep.warnings.push_back("Govdede " + std::to_string(rep.relocCount) + " reloc -> ilk decrypt'te delta geri alinacak (reloc-guvenli)");
     }
@@ -595,7 +659,27 @@ inline bool Build(Core& c, const Options& optIn, Report& rep) {
 
     // proxy 2. pas: gercek RVA ile
     rep.proxyExpands = 0; rep.proxyRipFix = 0; rep.proxyRelFix = 0;
-    BuildProxy(head, rep.fnRva, rep.headLen, rep.proxyRva, proxy, rep);
+    std::map<u32,u32> rvaToProxyOff;
+    BuildProxy(head, rep.fnRva, rep.headLen, rep.proxyRva, proxy, rep, &rvaToProxyOff);
+
+    // V4.3.1: head reloc'larini proxy ofislerine tasi (mutlak VA'lar
+    // loader tarafindan proxy uzerinde relocate edilsin)
+    for (auto& hr : headRelocs) {
+        bool placed = false;
+        for (auto& h : head) {
+            if (hr.rva >= h.rva && hr.rva < h.rva + h.size) {
+                auto it = rvaToProxyOff.find(h.rva);
+                if (it != rvaToProxyOff.end()) {
+                    hr.rva = rep.proxyRva + it->second + (hr.rva - h.rva);
+                    pe.relocs.push_back(hr);
+                    placed = true;
+                }
+                break;
+            }
+        }
+        if (!placed)
+            rep.warnings.push_back("Head reloc proxy'ye konamadi (rva=0x" + std::to_string(hr.rva) + ") -> silindi");
+    }
 
     Asm a;
     EmitBlob(pe.is64, rep.blobRva, proxy, relocList, a);

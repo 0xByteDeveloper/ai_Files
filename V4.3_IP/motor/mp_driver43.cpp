@@ -150,6 +150,53 @@ int main(int argc, char** argv) {
                 ((PIMAGE_NT_HEADERS32)nt)->OptionalHeader.ImageBase = (u32)newBase;
                 c.pe.imgBase = newBase; c.mem.base = newBase;
             }
+            // --- REBASE-TAM (V4.3.1): TUM mutlak VA'lari yeni base'e tasi ---
+            // Tercih edilen base'de yuklemede loader relocation UYGULAMAZ.
+            // ImageBase'i degistirirsek TLS dizini + kod/veri icindeki mutlak
+            // degerler ESKI base'de kalicak -> ntdll TLS init garbage pointer
+            // -> c000001d illegal-instruction (wine32'de kanitlandi).
+            // (a) .reloc hedeflerindeki degerler (kod imm32/imm64 + TLS + veri)
+            {
+                int patched = 0;
+                for (auto& r : c.pe.relocs) {
+                    u32 sz = (r.type == 10) ? 8 : 4;
+                    if (r.rva + sz > c.pe.imgSz) continue;
+                    u64 v = 0;
+                    memcpy(&v, &c.mem.data[r.rva], sz);
+                    if (v >= oldBase && v < oldBase + c.pe.imgSz) {
+                        v += dB;
+                        memcpy(&c.mem.data[r.rva], &v, sz);
+                        patched++;
+                    }
+                }
+                // (b) TLS dizini (dd[9]): Start/End/Index/Callbacks mutlak VA
+                // NOT: linuxshim'de PIMAGE_NT_HEADERS = 64-bit variant! Acik cast ZORUNLU.
+                auto& tls = c.pe.is64 ? ((PIMAGE_NT_HEADERS64)nt)->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_TLS]
+                                      : ((PIMAGE_NT_HEADERS32)nt)->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_TLS];
+                if (tls.VirtualAddress && tls.Size >= 0x18) {
+                    u32 o = tls.VirtualAddress;
+                    for (int i = 0; i < 4; i++) {
+                        u32 v; memcpy(&v, &c.mem.data[o + i * 4], 4);
+                        if (v >= oldBase && v < oldBase + c.pe.imgSz) {
+                            v += (u32)dB; memcpy(&c.mem.data[o + i * 4], &v, 4); patched++;
+                        }
+                    }
+                }
+                // (c) LoadConfig (dd[10], varsa): SEHandlerTable/GuardCF VA'lari
+                auto& lcfg = c.pe.is64 ? ((PIMAGE_NT_HEADERS64)nt)->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_LOAD_CONFIG]
+                                       : ((PIMAGE_NT_HEADERS32)nt)->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_LOAD_CONFIG];
+                if (lcfg.VirtualAddress && lcfg.Size >= 0x40) {
+                    u32 o = lcfg.VirtualAddress;
+                    const u32 offs[3] = { 0x20, 0x28, 0x30 }; // SEHandlerTable, GuardCFCheckFnPtr, GuardCFFunctionTable
+                    for (int i = 0; i < 3; i++) {
+                        u32 v; memcpy(&v, &c.mem.data[o + offs[i]], 4);
+                        if (v >= oldBase && v < oldBase + c.pe.imgSz) {
+                            v += (u32)dB; memcpy(&c.mem.data[o + offs[i]], &v, 4); patched++;
+                        }
+                    }
+                }
+                printf("DLL rebase-TAM: %d mutlak VA yeni base'e tasindi (reloc+TLS+LoadConfig)\n", patched);
+            }
             // .gfn icindeki mutlak VA'ları (isim+fnc) yeni base'e tasi
             for (auto& gs : c.pe.secs) {
                 if (strcmp(gs.name, ".gfn")) continue;
@@ -328,6 +375,54 @@ int main(int argc, char** argv) {
     }
     fprintf(map, "# TOPLAM: %d fonksiyon korundu (IP%d), %d atlandi\n", okCount, ipMethod, skipCount);
     fclose(map);
+
+    // ---- V4.3.1: .reloc KAPASITE KONTROLU ----
+    // Head-reloc'lar proxy sayfalarina tasininca .reloc'ta YENI page-blok'lar
+    // gerekir. RebuildRelocations() yalnizca mevcut .reloc raw alanina (cap =
+    // eski DataDirectory Size) yazar; tasmayan bloklari SESSIZCE DUSURUR ->
+    // loader proxy'deki mutlak VA'lari relocate etmez -> cakisan base'de cokes.
+    // Cozum: kapasite yetmiyorsa yeni ".rloc" section ac + reloc dizinini ora tasi.
+    {
+        auto rels = c.pe.relocs;
+        std::sort(rels.begin(), rels.end(), [](auto& a, auto& b) { return a.rva < b.rva; });
+        u32 need = 0, page = 0xFFFFFFFF, cnt = 0;
+        for (auto& r : rels) {
+            if (r.type == 0) continue;
+            u32 pg = r.rva & ~0xFFFu;
+            if (pg != page) { if (cnt) need += 8 + 2 * cnt + (cnt & 1); page = pg; cnt = 0; }
+            cnt++;
+        }
+        if (cnt) need += 8 + 2 * cnt + (cnt & 1);
+        auto dos = (PIMAGE_DOS_HEADER)c.pe.raw.data();
+        auto nt = (PIMAGE_NT_HEADERS)(c.pe.raw.data() + dos->e_lfanew);
+        // NOT: linuxshim'de PIMAGE_NT_HEADERS = 64-bit variant -> acik cast ZORUNLU
+        auto& rd = c.pe.is64 ? ((PIMAGE_NT_HEADERS64)nt)->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_BASERELOC]
+                             : ((PIMAGE_NT_HEADERS32)nt)->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_BASERELOC];
+        printf("RELOC kapasite kontrolu: need=%u rdSize=%u rdRva=0x%X relocs=%d\n",
+               need, rd.Size, rd.VirtualAddress, (int)c.pe.relocs.size());
+        printf("[DBG] e_lfanew=0x%X sig=0x%08X nsec=%d nRvaAndSizes=%d raw=%d dd0={0x%X,0x%X} dd1={0x%X,0x%X}\n",
+               dos->e_lfanew, nt->Signature, (int)nt->FileHeader.NumberOfSections,
+               (int)(c.pe.is64 ? ((PIMAGE_NT_HEADERS64)nt)->OptionalHeader.NumberOfRvaAndSizes
+                               : ((PIMAGE_NT_HEADERS32)nt)->OptionalHeader.NumberOfRvaAndSizes), (int)c.pe.raw.size(),
+               nt->OptionalHeader.DataDirectory[0].VirtualAddress, nt->OptionalHeader.DataDirectory[0].Size,
+               nt->OptionalHeader.DataDirectory[1].VirtualAddress, nt->OptionalHeader.DataDirectory[1].Size);
+        if (rd.VirtualAddress && need > rd.Size) {
+            u32 rlocRva = 0, oldSz = rd.Size;
+            u32 chars = IMAGE_SCN_CNT_INITIALIZED_DATA | IMAGE_SCN_MEM_READ | IMAGE_SCN_MEM_WRITE;
+            u32 allocSz = need + 256;   // guvenli pay
+            if (MazeProtect::GrowAppendSection(c.pe, c.mem, ".rloc", allocSz, chars, rlocRva)) {
+                rd.VirtualAddress = rlocRva;
+                rd.Size = allocSz;
+                printf("RELOC kapasitesi: gereken=%u > eski=%u -> yeni .rloc section (rva=0x%X, %uB)\n",
+                       need, oldSz, rlocRva, allocSz);
+            } else {
+                fprintf(stderr, "UYARI: .rloc section eklenemedi -> head-reloc'lar dusme riski!\n");
+            }
+        } else if (rd.VirtualAddress) {
+            printf("RELOC kapasitesi: gereken=%u <= mevcut=%u (ek section gerekmedi)\n", need, rd.Size);
+        }
+    }
+
 
     {   // DEBUG: reloc vektor durumu
         int headCnt = 0;

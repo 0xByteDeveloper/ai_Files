@@ -1,0 +1,314 @@
+# MazeMap - i4M MazeProtector (Jump labirenti haritasi)
+# Format: FUNC <isim> <fnRva> <fnSize> <entryRva> <chunk> <jmpSayisi> sonra JMP satirlari
+# RVA'lar ImageBase'e gore. Cheat Engine: modulBase + RVA
+# MODE ARENA-V4-STREAM (god-tier, MP_STREAM): parcalar TEK TEK tek bir 32B slot'a
+#  cozulur, WIPE-BEHIND oncekini siler -> her an arenada max 1 parca plaintext;
+#  tam fonksiyon HICBIR an bitisik var olmaz. G1: slot her cagride rastgele adrese
+#  duser (dump-replay olur). G2: CRC-8 parca butunlugu (anti-patch). G3: %25 decoy
+#  enjeksiyonu. Kenarlar .maze'deki 9B thunk'lardan gecer; duvar varsa jne alinir
+#  ve px/ny parcasi o cagride HIC cozulmez (lazy cold-path).
+FUNC FnvHash1a 4096 63 37829 8 9
+JMP 38288
+JMP 38299
+JMP 38310
+JMP 38321
+JMP 38332
+JMP 38343
+JMP 38354
+JMP 38365
+JMP 38376
+BLK 00 enc=0x0000 len= 16 ops= 1 rva=0x1000..0x1007 sites=1 crc=0x00
+BLK 01 enc=0x0000 len= 16 ops= 2 rva=0x1007..0x100D sites=2 crc=0x00
+BLK 02 enc=0x0000 len= 16 ops= 1 rva=0x100D..0x1014 sites=1 crc=0x00
+BLK 03 enc=0x0000 len= 24 ops= 1 rva=0x1014..0x1020 sites=1 crc=0x00
+BLK 04 enc=0x0000 len= 16 ops= 1 rva=0x1020..0x1028 sites=1 crc=0x00
+BLK 05 enc=0x0000 len= 16 ops= 1 rva=0x1028..0x1030 sites=1 crc=0x00
+BLK 06 enc=0x0000 len= 24 ops= 3 rva=0x1030..0x1038 sites=3 crc=0x00
+BLK 07 enc=0x0000 len= 16 ops= 1 rva=0x1038..0x103F sites=1 crc=0x00
+SITE blk=1 +0x02 kind=THUNK val=0x7
+SITE blk=1 +0x0B kind=THUNK val=0x2
+SITE blk=6 +0x02 kind=THUNK val=0x4
+SITE blk=6 +0x08 kind=THUNK val=0xFE
+SITE blk=6 +0x11 kind=THUNK val=0x7
+SITE blk=4 +0x09 kind=THUNK val=0x5
+SITE blk=2 +0x08 kind=THUNK val=0x3
+SITE blk=0 +0x08 kind=THUNK val=0x1
+SITE blk=5 +0x09 kind=THUNK val=0x6
+SITE blk=3 +0x0D kind=THUNK val=0x4
+SITE blk=7 +0x07 kind=THUNK val=0xFE
+EDGE thunk=0x9590 mov edx,0 -> parca0
+EDGE thunk=0x959B mov edx,1 -> parca1
+EDGE thunk=0x95A6 mov edx,2 -> parca2
+EDGE thunk=0x95B1 mov edx,3 -> parca3
+EDGE thunk=0x95BC mov edx,4 -> parca4
+EDGE thunk=0x95C7 mov edx,5 -> parca5
+EDGE thunk=0x95D2 mov edx,6 -> parca6
+EDGE thunk=0x95DD mov edx,7 -> parca7
+EDGE thunk=0x95E8 mov edx,0xFE -> cleanup
+WARN IAT'ye eklendi: kernel32!VirtualAlloc (.mpimp section)
+WARN IAT'ye eklendi: kernel32!VirtualFree (.mpimp section)
+WARN x86: .reloc guncellendi (HIGHLOW toplam)
+WARN V4.2-X86 STREAM AKTIF: absolute+reloc adresleme, conv=esi (stage-ici), thunk [blob+0x40]
+WARN G1 slot rastgele (32x32B) + G2 CRC-8 + G3 decoy
+FUNC LcgNext 4160 31 39845 3 4
+JMP 40240
+JMP 40251
+JMP 40262
+JMP 40273
+BLK 00 enc=0x0000 len= 16 ops= 1 rva=0x1040..0x104A sites=1 crc=0x00
+BLK 01 enc=0x0000 len= 24 ops= 1 rva=0x104A..0x1056 sites=1 crc=0x00
+BLK 02 enc=0x0000 len= 16 ops= 1 rva=0x1056..0x105F sites=1 crc=0x00
+SITE blk=1 +0x0D kind=THUNK val=0x2
+SITE blk=2 +0x09 kind=THUNK val=0xFE
+SITE blk=0 +0x0B kind=THUNK val=0x1
+EDGE thunk=0x9D30 mov edx,0 -> parca0
+EDGE thunk=0x9D3B mov edx,1 -> parca1
+EDGE thunk=0x9D46 mov edx,2 -> parca2
+EDGE thunk=0x9D51 mov edx,0xFE -> cleanup
+WARN x86: .reloc guncellendi (HIGHLOW toplam)
+WARN V4.2-X86 STREAM AKTIF: absolute+reloc adresleme, conv=esi (stage-ici), thunk [blob+0x40]
+WARN G1 slot rastgele (32x32B) + G2 CRC-8 + G3 decoy
+FUNC XorCipher 4192 59 41869 7 8
+JMP 42368
+JMP 42379
+JMP 42390
+JMP 42401
+JMP 42412
+JMP 42423
+JMP 42434
+JMP 42445
+BLK 00 enc=0x0000 len= 24 ops= 1 rva=0x1060..0x106C sites=1 crc=0x00
+BLK 01 enc=0x0000 len= 24 ops= 2 rva=0x106C..0x1074 sites=2 crc=0x00
+BLK 02 enc=0x0000 len= 24 ops= 1 rva=0x1074..0x1080 sites=1 crc=0x00
+BLK 03 enc=0x0000 len= 16 ops= 1 rva=0x1080..0x108B sites=1 crc=0x00
+BLK 04 enc=0x0000 len= 24 ops= 1 rva=0x108B..0x1097 sites=1 crc=0x00
+BLK 05 enc=0x0000 len= 16 ops= 2 rva=0x1097..0x1099 sites=2 crc=0x00
+BLK 06 enc=0x0000 len=  8 ops= 1 rva=0x1099..0x109B sites=1 crc=0x00
+SITE blk=5 +0x02 kind=THUNK val=0x3
+SITE blk=5 +0x07 kind=THUNK val=0x6
+SITE blk=0 +0x0D kind=THUNK val=0x1
+SITE blk=1 +0x04 kind=THUNK val=0x6
+SITE blk=1 +0x0D kind=THUNK val=0x2
+SITE blk=3 +0x0C kind=THUNK val=0x4
+SITE blk=6 +0x02 kind=THUNK val=0xFE
+SITE blk=4 +0x0D kind=THUNK val=0x5
+SITE blk=2 +0x0D kind=THUNK val=0x3
+EDGE thunk=0xA580 mov edx,0 -> parca0
+EDGE thunk=0xA58B mov edx,1 -> parca1
+EDGE thunk=0xA596 mov edx,2 -> parca2
+EDGE thunk=0xA5A1 mov edx,3 -> parca3
+EDGE thunk=0xA5AC mov edx,4 -> parca4
+EDGE thunk=0xA5B7 mov edx,5 -> parca5
+EDGE thunk=0xA5C2 mov edx,6 -> parca6
+EDGE thunk=0xA5CD mov edx,0xFE -> cleanup
+WARN x86: .reloc guncellendi (HIGHLOW toplam)
+WARN V4.2-X86 STREAM AKTIF: absolute+reloc adresleme, conv=esi (stage-ici), thunk [blob+0x40]
+WARN G1 slot rastgele (32x32B) + G2 CRC-8 + G3 decoy
+FUNC ChecksumBlock 4256 230 46037 28 29
+JMP 46832
+JMP 46843
+JMP 46854
+JMP 46865
+JMP 46876
+JMP 46887
+JMP 46898
+JMP 46909
+JMP 46920
+JMP 46931
+JMP 46942
+JMP 46953
+JMP 46964
+JMP 46975
+JMP 46986
+JMP 46997
+JMP 47008
+JMP 47019
+JMP 47030
+JMP 47041
+JMP 47052
+JMP 47063
+JMP 47074
+JMP 47085
+JMP 47096
+JMP 47107
+JMP 47118
+JMP 47129
+JMP 47140
+BLK 00 enc=0x0000 len= 16 ops= 1 rva=0x10A0..0x10AB sites=1 crc=0x00
+BLK 01 enc=0x0000 len= 16 ops= 2 rva=0x10AB..0x10B3 sites=2 crc=0x00
+BLK 02 enc=0x0000 len= 24 ops= 1 rva=0x10B3..0x10BF sites=1 crc=0x00
+BLK 03 enc=0x0000 len= 16 ops= 1 rva=0x10BF..0x10C8 sites=1 crc=0x00
+BLK 04 enc=0x0000 len= 16 ops= 1 rva=0x10C8..0x10D2 sites=1 crc=0x00
+BLK 05 enc=0x0000 len= 16 ops= 2 rva=0x10D2..0x10D8 sites=2 crc=0x00
+BLK 06 enc=0x0000 len= 24 ops= 1 rva=0x10D8..0x10E4 sites=1 crc=0x00
+BLK 07 enc=0x0000 len= 16 ops= 1 rva=0x10E4..0x10E8 sites=1 crc=0x00
+BLK 08 enc=0x0000 len= 16 ops= 2 rva=0x10E8..0x10ED sites=2 crc=0x00
+BLK 09 enc=0x0000 len= 16 ops= 1 rva=0x10ED..0x10F7 sites=1 crc=0x00
+BLK 10 enc=0x0000 len= 16 ops= 1 rva=0x10F7..0x10FE sites=1 crc=0x00
+BLK 11 enc=0x0000 len= 16 ops= 2 rva=0x10FE..0x1100 sites=2 crc=0x00
+BLK 12 enc=0x0000 len= 24 ops= 1 rva=0x1100..0x110C sites=1 crc=0x00
+BLK 13 enc=0x0000 len= 16 ops= 1 rva=0x110C..0x1114 sites=1 crc=0x00
+BLK 14 enc=0x0000 len= 24 ops= 1 rva=0x1114..0x1120 sites=1 crc=0x00
+BLK 15 enc=0x0000 len= 16 ops= 1 rva=0x1120..0x112B sites=1 crc=0x00
+BLK 16 enc=0x0000 len= 16 ops= 1 rva=0x112B..0x1135 sites=1 crc=0x00
+BLK 17 enc=0x0000 len= 24 ops= 2 rva=0x1135..0x113D sites=2 crc=0x00
+BLK 18 enc=0x0000 len= 16 ops= 2 rva=0x113D..0x1143 sites=2 crc=0x00
+BLK 19 enc=0x0000 len= 16 ops= 1 rva=0x1143..0x1148 sites=1 crc=0x00
+BLK 20 enc=0x0000 len= 16 ops= 1 rva=0x1148..0x1151 sites=1 crc=0x00
+BLK 21 enc=0x0000 len= 16 ops= 2 rva=0x1151..0x1157 sites=2 crc=0x00
+BLK 22 enc=0x0000 len= 16 ops= 1 rva=0x1157..0x115D sites=1 crc=0x00
+BLK 23 enc=0x0000 len= 16 ops= 1 rva=0x115D..0x1162 sites=1 crc=0x00
+BLK 24 enc=0x0000 len= 16 ops= 1 rva=0x1162..0x116B sites=1 crc=0x00
+BLK 25 enc=0x0000 len= 24 ops= 1 rva=0x116B..0x1177 sites=1 crc=0x00
+BLK 26 enc=0x0000 len= 24 ops= 2 rva=0x1177..0x1180 sites=2 crc=0x00
+BLK 27 enc=0x0000 len= 16 ops= 2 rva=0x1180..0x1186 sites=2 crc=0x00
+SITE blk=3 +0x0A kind=THUNK val=0x4
+SITE blk=5 +0x01 kind=THUNK val=0xC
+SITE blk=5 +0x0A kind=THUNK val=0x6
+SITE blk=26 +0x03 kind=THUNK val=0xFE
+SITE blk=26 +0x0E kind=THUNK val=0x1B
+SITE blk=13 +0x09 kind=THUNK val=0xE
+SITE blk=9 +0x0B kind=THUNK val=0xA
+SITE blk=0 +0x0C kind=THUNK val=0x1
+SITE blk=18 +0x05 kind=THUNK val=0x8
+SITE blk=18 +0x0A kind=THUNK val=0x13
+SITE blk=6 +0x0D kind=THUNK val=0x7
+SITE blk=2 +0x0D kind=THUNK val=0x3
+SITE blk=4 +0x0B kind=THUNK val=0x5
+SITE blk=14 +0x0D kind=THUNK val=0xF
+SITE blk=27 +0x05 kind=THUNK val=0x18
+SITE blk=27 +0x0A kind=THUNK val=0xFE
+SITE blk=22 +0x07 kind=THUNK val=0x17
+SITE blk=8 +0x05 kind=THUNK val=0xA
+SITE blk=8 +0x0A kind=THUNK val=0x9
+SITE blk=23 +0x06 kind=THUNK val=0x18
+SITE blk=24 +0x0A kind=THUNK val=0x19
+SITE blk=11 +0x02 kind=THUNK val=0x14
+SITE blk=11 +0x07 kind=THUNK val=0xC
+SITE blk=12 +0x0D kind=THUNK val=0xD
+SITE blk=21 +0x02 kind=THUNK val=0x17
+SITE blk=21 +0x0B kind=THUNK val=0x16
+SITE blk=15 +0x0C kind=THUNK val=0x10
+SITE blk=10 +0x08 kind=THUNK val=0xB
+SITE blk=25 +0x0D kind=THUNK val=0x1A
+SITE blk=19 +0x06 kind=THUNK val=0x14
+SITE blk=16 +0x0B kind=THUNK val=0x11
+SITE blk=1 +0x04 kind=THUNK val=0x1B
+SITE blk=1 +0x09 kind=THUNK val=0x2
+SITE blk=7 +0x05 kind=THUNK val=0x8
+SITE blk=20 +0x0A kind=THUNK val=0x15
+SITE blk=17 +0x08 kind=THUNK val=0x6
+SITE blk=17 +0x0D kind=THUNK val=0x12
+EDGE thunk=0xB6F0 mov edx,0 -> parca0
+EDGE thunk=0xB6FB mov edx,1 -> parca1
+EDGE thunk=0xB706 mov edx,2 -> parca2
+EDGE thunk=0xB711 mov edx,3 -> parca3
+EDGE thunk=0xB71C mov edx,4 -> parca4
+EDGE thunk=0xB727 mov edx,5 -> parca5
+EDGE thunk=0xB732 mov edx,6 -> parca6
+EDGE thunk=0xB73D mov edx,7 -> parca7
+EDGE thunk=0xB748 mov edx,8 -> parca8
+EDGE thunk=0xB753 mov edx,9 -> parca9
+EDGE thunk=0xB75E mov edx,10 -> parca10
+EDGE thunk=0xB769 mov edx,11 -> parca11
+EDGE thunk=0xB774 mov edx,12 -> parca12
+EDGE thunk=0xB77F mov edx,13 -> parca13
+EDGE thunk=0xB78A mov edx,14 -> parca14
+EDGE thunk=0xB795 mov edx,15 -> parca15
+EDGE thunk=0xB7A0 mov edx,16 -> parca16
+EDGE thunk=0xB7AB mov edx,17 -> parca17
+EDGE thunk=0xB7B6 mov edx,18 -> parca18
+EDGE thunk=0xB7C1 mov edx,19 -> parca19
+EDGE thunk=0xB7CC mov edx,20 -> parca20
+EDGE thunk=0xB7D7 mov edx,21 -> parca21
+EDGE thunk=0xB7E2 mov edx,22 -> parca22
+EDGE thunk=0xB7ED mov edx,23 -> parca23
+EDGE thunk=0xB7F8 mov edx,24 -> parca24
+EDGE thunk=0xB803 mov edx,25 -> parca25
+EDGE thunk=0xB80E mov edx,26 -> parca26
+EDGE thunk=0xB819 mov edx,27 -> parca27
+EDGE thunk=0xB824 mov edx,0xFE -> cleanup
+WARN x86: .reloc guncellendi (HIGHLOW toplam)
+WARN V4.2-X86 STREAM AKTIF: absolute+reloc adresleme, conv=esi (stage-ici), thunk [blob+0x40]
+WARN G1 slot rastgele (32x32B) + G2 CRC-8 + G3 decoy
+FUNC MergeHash 4496 108 50181 12 13
+JMP 50624
+JMP 50635
+JMP 50646
+JMP 50657
+JMP 50668
+JMP 50679
+JMP 50690
+JMP 50701
+JMP 50712
+JMP 50723
+JMP 50734
+JMP 50745
+JMP 50756
+BLK 00 enc=0x0000 len= 16 ops= 1 rva=0x1190..0x119A sites=1 crc=0x00
+BLK 01 enc=0x0000 len= 24 ops= 1 rva=0x119A..0x11A6 sites=1 crc=0x00
+BLK 02 enc=0x0000 len= 16 ops= 2 rva=0x11A6..0x11B0 sites=2 crc=0x00
+BLK 03 enc=0x0000 len= 24 ops= 2 rva=0x11B0..0x11BC sites=2 crc=0x00
+BLK 04 enc=0x0000 len= 16 ops= 1 rva=0x11BC..0x11C0 sites=1 crc=0x00
+BLK 05 enc=0x0000 len= 16 ops= 1 rva=0x11C0..0x11CB sites=1 crc=0x00
+BLK 06 enc=0x0000 len= 16 ops= 1 rva=0x11CB..0x11D6 sites=1 crc=0x00
+BLK 07 enc=0x0000 len= 16 ops= 2 rva=0x11D6..0x11DB sites=2 crc=0x00
+BLK 08 enc=0x0000 len= 16 ops= 1 rva=0x11DB..0x11E3 sites=1 crc=0x00
+BLK 09 enc=0x0000 len= 24 ops= 2 rva=0x11E3..0x11EF sites=2 crc=0x00
+BLK 10 enc=0x0000 len= 24 ops= 1 rva=0x11EF..0x11FB sites=1 crc=0x00
+BLK 11 enc=0x0000 len=  8 ops= 1 rva=0x11FB..0x11FC sites=1 crc=0x00
+SITE blk=7 +0x02 kind=THUNK val=0x5
+SITE blk=7 +0x0A kind=THUNK val=0x8
+SITE blk=5 +0x0C kind=THUNK val=0x6
+SITE blk=9 +0x01 kind=MODUL val=0x10A0
+SITE blk=9 +0x0D kind=THUNK val=0xA
+SITE blk=3 +0x01 kind=MODUL val=0x1040
+SITE blk=3 +0x0D kind=THUNK val=0x4
+SITE blk=8 +0x09 kind=THUNK val=0x9
+SITE blk=4 +0x05 kind=THUNK val=0x5
+SITE blk=11 +0x01 kind=THUNK val=0xFE
+SITE blk=2 +0x04 kind=MODUL val=0x1000
+SITE blk=2 +0x0B kind=THUNK val=0x3
+SITE blk=0 +0x0B kind=THUNK val=0x1
+SITE blk=6 +0x0C kind=THUNK val=0x7
+SITE blk=1 +0x0D kind=THUNK val=0x2
+SITE blk=10 +0x0D kind=THUNK val=0xB
+EDGE thunk=0xC5C0 mov edx,0 -> parca0
+EDGE thunk=0xC5CB mov edx,1 -> parca1
+EDGE thunk=0xC5D6 mov edx,2 -> parca2
+EDGE thunk=0xC5E1 mov edx,3 -> parca3
+EDGE thunk=0xC5EC mov edx,4 -> parca4
+EDGE thunk=0xC5F7 mov edx,5 -> parca5
+EDGE thunk=0xC602 mov edx,6 -> parca6
+EDGE thunk=0xC60D mov edx,7 -> parca7
+EDGE thunk=0xC618 mov edx,8 -> parca8
+EDGE thunk=0xC623 mov edx,9 -> parca9
+EDGE thunk=0xC62E mov edx,10 -> parca10
+EDGE thunk=0xC639 mov edx,11 -> parca11
+EDGE thunk=0xC644 mov edx,0xFE -> cleanup
+WARN x86: .reloc guncellendi (HIGHLOW toplam)
+WARN V4.2-X86 STREAM AKTIF: absolute+reloc adresleme, conv=esi (stage-ici), thunk [blob+0x40]
+WARN G1 slot rastgele (32x32B) + G2 CRC-8 + G3 decoy
+FUNC ClampAdd 4608 39 54141 4 5
+JMP 54608
+JMP 54619
+JMP 54630
+JMP 54641
+JMP 54652
+BLK 00 enc=0x0000 len= 24 ops= 1 rva=0x1200..0x120C sites=1 crc=0x00
+BLK 01 enc=0x0000 len= 24 ops= 1 rva=0x120C..0x1218 sites=1 crc=0x00
+BLK 02 enc=0x0000 len= 24 ops= 1 rva=0x1218..0x1224 sites=1 crc=0x00
+BLK 03 enc=0x0000 len=  8 ops= 1 rva=0x1224..0x1227 sites=1 crc=0x00
+SITE blk=0 +0x0D kind=THUNK val=0x1
+SITE blk=2 +0x0D kind=THUNK val=0x3
+SITE blk=1 +0x0D kind=THUNK val=0x2
+SITE blk=3 +0x03 kind=THUNK val=0xFE
+EDGE thunk=0xD550 mov edx,0 -> parca0
+EDGE thunk=0xD55B mov edx,1 -> parca1
+EDGE thunk=0xD566 mov edx,2 -> parca2
+EDGE thunk=0xD571 mov edx,3 -> parca3
+EDGE thunk=0xD57C mov edx,0xFE -> cleanup
+WARN x86: .reloc guncellendi (HIGHLOW toplam)
+WARN V4.2-X86 STREAM AKTIF: absolute+reloc adresleme, conv=esi (stage-ici), thunk [blob+0x40]
+WARN G1 slot rastgele (32x32B) + G2 CRC-8 + G3 decoy
+# TOPLAM: 6 fonksiyon korundu, 0 atlandi, 0 kapsam-disi (MP_ONLY), 68 JMP, 0 yem blok

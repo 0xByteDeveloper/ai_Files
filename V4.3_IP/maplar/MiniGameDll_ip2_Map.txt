@@ -2,11 +2,13 @@
 # MODE: IP2 Stream-IP: govde YERINDE sifreli; her cagrida yerinde cozulur, donuste YENI rastgele anahtarla yeniden sifrelenir
 # Format: FUNC <isim> <fnRva> <fnSize> <cbRva> <proxyRva> <handlerRva> <seedHex> <method>
 # RVA'lar ImageBase'e gore. Cheat Engine: modulBase + RVA
-FUNC MM_Move 5328 349 114688 114968 114980 4B3472E7 2
-IPINFO headLen=7 bodyLen=342 blobRva=0x1C000 blobSize=666 retsRva=0x1C216 crc=B1E6C712 state=depth0/lock0/enc
+FUNC MM_Move 5328 349 114688 114968 114980 68FD540A 2
+IPINFO headLen=7 bodyLen=342 blobRva=0x1C000 blobSize=730 retsRva=0x1C256 crc=D6E1DDE2 state=depth0/lock0/enc
+WARN Head bolgesinde 1 reloc -> proxy'ye tasinacak (V4.3.1)
 WARN Govdede 18 reloc -> ilk decrypt'te delta geri alinacak (reloc-guvenli)
 WARN Govde section'i yazilabilir yapildi (in-place decrypt)
-FUNC MM_Lcg 5680 24 118784 118996 119011 436643C2 2
-IPINFO headLen=10 bodyLen=14 blobRva=0x1D000 blobSize=601 retsRva=0x1D1D5 crc=A426405C state=depth0/lock0/enc
+FUNC MM_Lcg 5680 24 118784 118996 119011 1BBCEC22 2
+IPINFO headLen=10 bodyLen=14 blobRva=0x1D000 blobSize=665 retsRva=0x1D215 crc=2734F3F3 state=depth0/lock0/enc
+WARN Head bolgesinde 1 reloc -> proxy'ye tasinacak (V4.3.1)
 WARN Govdede 1 reloc -> ilk decrypt'te delta geri alinacak (reloc-guvenli)
 # TOPLAM: 2 fonksiyon korundu (IP2), 0 atlandi

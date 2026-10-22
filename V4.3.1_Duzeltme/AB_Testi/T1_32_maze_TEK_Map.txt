@@ -1,0 +1,31 @@
+# MazeMap - i4M MazeProtector (Jump labirenti haritasi)
+# Format: FUNC <isim> <fnRva> <fnSize> <entryRva> <chunk> <jmpSayisi> sonra JMP satirlari
+# RVA'lar ImageBase'e gore. Cheat Engine: modulBase + RVA
+# KAPSAM: MP_ONLY - sadece LcgNext korundu (sicak yol plaintext: cizim/girdi/dongu sifresiz)
+# MODE ARENA-V4-STREAM (god-tier, MP_STREAM): parcalar TEK TEK tek bir 32B slot'a
+#  cozulur, WIPE-BEHIND oncekini siler -> her an arenada max 1 parca plaintext;
+#  tam fonksiyon HICBIR an bitisik var olmaz. G1: slot her cagride rastgele adrese
+#  duser (dump-replay olur). G2: CRC-8 parca butunlugu (anti-patch). G3: %25 decoy
+#  enjeksiyonu. Kenarlar .maze'deki 9B thunk'lardan gecer; duvar varsa jne alinir
+#  ve px/ny parcasi o cagride HIC cozulmez (lazy cold-path).
+FUNC LcgNext 4160 31 37797 3 4
+JMP 38192
+JMP 38203
+JMP 38214
+JMP 38225
+BLK 00 enc=0x0000 len= 16 ops= 1 rva=0x1040..0x104A sites=1 crc=0x00
+BLK 01 enc=0x0000 len= 24 ops= 1 rva=0x104A..0x1056 sites=1 crc=0x00
+BLK 02 enc=0x0000 len= 16 ops= 1 rva=0x1056..0x105F sites=1 crc=0x00
+SITE blk=1 +0x0D kind=THUNK val=0x2
+SITE blk=2 +0x09 kind=THUNK val=0xFE
+SITE blk=0 +0x0B kind=THUNK val=0x1
+EDGE thunk=0x9530 mov edx,0 -> parca0
+EDGE thunk=0x953B mov edx,1 -> parca1
+EDGE thunk=0x9546 mov edx,2 -> parca2
+EDGE thunk=0x9551 mov edx,0xFE -> cleanup
+WARN IAT'ye eklendi: kernel32!VirtualAlloc (.mpimp section)
+WARN IAT'ye eklendi: kernel32!VirtualFree (.mpimp section)
+WARN x86: .reloc guncellendi (HIGHLOW toplam)
+WARN V4.2-X86 STREAM AKTIF: absolute+reloc adresleme, conv=esi (stage-ici), thunk [blob+0x40]
+WARN G1 slot rastgele (32x32B) + G2 CRC-8 + G3 decoy
+# TOPLAM: 1 fonksiyon korundu, 0 atlandi, 5 kapsam-disi (MP_ONLY), 4 JMP, 0 yem blok

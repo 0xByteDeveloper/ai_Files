@@ -1,8 +1,0 @@
-# MazeMap - i4M MazeProtector V4.3-IP (in-place sifreleme)
-# MODE: IP1 TekTek-IP: govde YERINDE sifreli; her cagrida yerinde cozulur, donuste ayni anahtarla yeniden sifrelenir
-# Format: FUNC <isim> <fnRva> <fnSize> <cbRva> <proxyRva> <handlerRva> <seedHex> <method>
-# RVA'lar ImageBase'e gore. Cheat Engine: modulBase + RVA
-FUNC GameLoop 4440 696 278528 278736 278746 6CA82467 1
-IPINFO headLen=5 bodyLen=691 blobRva=0x44000 blobSize=696 retsRva=0x44229 crc=CADCD9C3 state=depth0/lock0/enc
-WARN Govde section'i yazilabilir yapildi (in-place decrypt)
-# TOPLAM: 1 fonksiyon korundu (IP1), 0 atlandi

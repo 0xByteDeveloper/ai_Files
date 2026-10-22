@@ -1,0 +1,10 @@
+# MazeMap - i4M MazeProtector (Jump labirenti haritasi)
+# Format: FUNC <isim> <fnRva> <fnSize> <entryRva> <chunk> <jmpSayisi> sonra JMP satirlari
+# RVA'lar ImageBase'e gore. Cheat Engine: modulBase + RVA
+# MODE ARENA-V4-STREAM (god-tier, MP_STREAM): parcalar TEK TEK tek bir 32B slot'a
+#  cozulur, WIPE-BEHIND oncekini siler -> her an arenada max 1 parca plaintext;
+#  tam fonksiyon HICBIR an bitisik var olmaz. G1: slot her cagride rastgele adrese
+#  duser (dump-replay olur). G2: CRC-8 parca butunlugu (anti-patch). G3: %25 decoy
+#  enjeksiyonu. Kenarlar .maze'deki 9B thunk'lardan gecer; duvar varsa jne alinir
+#  ve px/ny parcasi o cagride HIC cozulmez (lazy cold-path).
+# TOPLAM: 0 fonksiyon korundu, 2 atlandi, 0 kapsam-disi (MP_ONLY), 0 JMP, 0 yem blok
