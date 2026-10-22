@@ -1,0 +1,499 @@
+# MazeMap - i4M MazeProtector (Jump labirenti haritasi)
+# Format: FUNC <isim> <fnRva> <fnSize> <entryRva> <chunk> <jmpSayisi> sonra JMP satirlari
+# RVA'lar ImageBase'e gore. Cheat Engine: modulBase + RVA
+# MODE ARENA-V4-TEKTEK (MP_TEKTEK): ayni slot + wipe-behind; G1/G2/G3 KAPALI
+#  (slot sabit adresde, CRC/decoy yok) - kullanici fikrinin duz hali.
+FUNC FnvHash1a 4096 62 45914 8 10
+JMP 4096
+JMP 45978
+JMP 45987
+JMP 45996
+JMP 46005
+JMP 46014
+JMP 46023
+JMP 46032
+JMP 46041
+JMP 46050
+INFO conv-reg: r12 (stage adresi tasiyici; cagirilan fonksiyonlar ABI geregi korur)
+INFO mod=V4-STREAM hardened=0 slot=32B maxPiece=24B template=362B conv=r12 arena=4096B
+BLK 00 enc=0x035A len=16 ops= 3 rva=0x1000..0x1006 sites=2 crc=0x6B
+BLK 01 enc=0x0312 len=16 ops= 2 rva=0x1006..0x100F sites=1 crc=0x2E
+BLK 02 enc=0x034A len=16 ops= 1 rva=0x100F..0x101A sites=1 crc=0xA4
+BLK 03 enc=0x037A len=16 ops= 1 rva=0x101A..0x1020 sites=1 crc=0x90
+BLK 04 enc=0x033A len=16 ops= 3 rva=0x1020..0x1029 sites=1 crc=0xD4
+BLK 05 enc=0x036A len=16 ops= 2 rva=0x1029..0x1032 sites=1 crc=0x18
+BLK 06 enc=0x0322 len=24 ops= 3 rva=0x1032..0x1038 sites=3 crc=0xC5
+BLK 07 enc=0x038A len=16 ops= 2 rva=0x1038..0x103E sites=1 crc=0xC8
+SITE blk=01 +0x0A kind=THUNK val=0x2
+SITE blk=06 +0x02 kind=THUNK val=0x4
+SITE blk=06 +0x07 kind=THUNK val=0xFE
+SITE blk=06 +0x0F kind=THUNK val=0x7
+SITE blk=04 +0x0A kind=THUNK val=0x5
+SITE blk=02 +0x0C kind=THUNK val=0x3
+SITE blk=00 +0x04 kind=THUNK val=0x7
+SITE blk=00 +0x0B kind=THUNK val=0x1
+SITE blk=05 +0x0A kind=THUNK val=0x6
+SITE blk=03 +0x07 kind=THUNK val=0x4
+SITE blk=07 +0x06 kind=THUNK val=0xFE
+EDGE thunk=0xB39A mov r10d,0 -> parca0
+EDGE thunk=0xB3A3 mov r10d,1 -> parca1
+EDGE thunk=0xB3AC mov r10d,2 -> parca2
+EDGE thunk=0xB3B5 mov r10d,3 -> parca3
+EDGE thunk=0xB3BE mov r10d,4 -> parca4
+EDGE thunk=0xB3C7 mov r10d,5 -> parca5
+EDGE thunk=0xB3D0 mov r10d,6 -> parca6
+EDGE thunk=0xB3D9 mov r10d,7 -> parca7
+EDGE thunk=0xB3E2 mov r10d,0xFE -> cleanup
+WARN IAT'ye eklendi: kernel32!VirtualAlloc (.mpimp section)
+WARN IAT'ye eklendi: kernel32!VirtualFree (.mpimp section)
+WARN V4 STREAM AKTIF: her cagride VirtualAlloc ile tek sayfa arena acilir, parcalar TEK TEK 32B'lik slot'a cozulur, WIPE-BEHIND oncekini siler; her an max 1 parca plaintext
+WARN ARENA-V3 kurali gecerli: ayni fonksiyonu ayni anda coklu thread'te cagirmayin (fallback yolu decrypt-once flagi kullanir); VirtualAlloc basarisizsa otomatik YERINDE stream'a duser (crash yok)
+FUNC LcgNext 4160 32 47378 4 6
+JMP 4160
+JMP 47434
+JMP 47443
+JMP 47452
+JMP 47461
+JMP 47470
+INFO conv-reg: r12 (stage adresi tasiyici; cagirilan fonksiyonlar ABI geregi korur)
+INFO mod=V4-STREAM hardened=0 slot=16B maxPiece=16B template=362B conv=r12 arena=4096B
+BLK 00 enc=0x0312 len=16 ops= 1 rva=0x1040..0x1047 sites=2 crc=0x2C
+BLK 01 enc=0x0322 len=16 ops= 1 rva=0x1047..0x1051 sites=2 crc=0x61
+BLK 02 enc=0x0332 len=16 ops= 2 rva=0x1051..0x105C sites=2 crc=0xBB
+BLK 03 enc=0x0342 len= 8 ops= 2 rva=0x105C..0x1060 sites=1 crc=0x6D
+SITE blk=00 +0x02 kind=RIP val=0x7040
+SITE blk=00 +0x08 kind=THUNK val=0x1
+SITE blk=01 +0x02 kind=RIP val=0x2040
+SITE blk=01 +0x0B kind=THUNK val=0x2
+SITE blk=02 +0x07 kind=RIP val=0x2040
+SITE blk=02 +0x0C kind=THUNK val=0x3
+SITE blk=03 +0x04 kind=THUNK val=0xFE
+EDGE thunk=0xB94A mov r10d,0 -> parca0
+EDGE thunk=0xB953 mov r10d,1 -> parca1
+EDGE thunk=0xB95C mov r10d,2 -> parca2
+EDGE thunk=0xB965 mov r10d,3 -> parca3
+EDGE thunk=0xB96E mov r10d,0xFE -> cleanup
+WARN V4 STREAM AKTIF: her cagride VirtualAlloc ile tek sayfa arena acilir, parcalar TEK TEK 32B'lik slot'a cozulur, WIPE-BEHIND oncekini siler; her an max 1 parca plaintext
+WARN ARENA-V3 kurali gecerli: ayni fonksiyonu ayni anda coklu thread'te cagirmayin (fallback yolu decrypt-once flagi kullanir); VirtualAlloc basarisizsa otomatik YERINDE stream'a duser (crash yok)
+FUNC XorCipher 4192 64 50066 9 11
+JMP 4192
+JMP 50090
+JMP 50099
+JMP 50108
+JMP 50117
+JMP 50126
+JMP 50135
+JMP 50144
+JMP 50153
+JMP 50162
+JMP 50171
+INFO conv-reg: r12 (stage adresi tasiyici; cagirilan fonksiyonlar ABI geregi korur)
+INFO mod=V4-STREAM hardened=0 slot=32B maxPiece=24B template=362B conv=r12 arena=4096B
+BLK 00 enc=0x0392 len=24 ops= 3 rva=0x1060..0x1068 sites=2 crc=0xFB
+BLK 01 enc=0x032A len=16 ops= 2 rva=0x1068..0x106D sites=1 crc=0x6D
+BLK 02 enc=0x0382 len=16 ops= 1 rva=0x106D..0x1078 sites=1 crc=0x41
+BLK 03 enc=0x0362 len=16 ops= 1 rva=0x1078..0x1080 sites=1 crc=0xD2
+BLK 04 enc=0x033A len=16 ops= 1 rva=0x1080..0x1087 sites=1 crc=0x07
+BLK 05 enc=0x0372 len=16 ops= 2 rva=0x1087..0x1091 sites=1 crc=0x20
+BLK 06 enc=0x0312 len=24 ops= 4 rva=0x1091..0x109D sites=1 crc=0xE9
+BLK 07 enc=0x0352 len=16 ops= 1 rva=0x109D..0x109F sites=2 crc=0xE0
+BLK 08 enc=0x034A len= 8 ops= 1 rva=0x109F..0x10A0 sites=1 crc=0x83
+SITE blk=06 +0x0D kind=THUNK val=0x7
+SITE blk=01 +0x06 kind=THUNK val=0x2
+SITE blk=04 +0x08 kind=THUNK val=0x5
+SITE blk=08 +0x01 kind=THUNK val=0xFE
+SITE blk=07 +0x02 kind=THUNK val=0x4
+SITE blk=07 +0x07 kind=THUNK val=0x8
+SITE blk=03 +0x09 kind=THUNK val=0x4
+SITE blk=05 +0x0B kind=THUNK val=0x6
+SITE blk=02 +0x0C kind=THUNK val=0x3
+SITE blk=00 +0x08 kind=THUNK val=0x8
+SITE blk=00 +0x0D kind=THUNK val=0x1
+EDGE thunk=0xC3AA mov r10d,0 -> parca0
+EDGE thunk=0xC3B3 mov r10d,1 -> parca1
+EDGE thunk=0xC3BC mov r10d,2 -> parca2
+EDGE thunk=0xC3C5 mov r10d,3 -> parca3
+EDGE thunk=0xC3CE mov r10d,4 -> parca4
+EDGE thunk=0xC3D7 mov r10d,5 -> parca5
+EDGE thunk=0xC3E0 mov r10d,6 -> parca6
+EDGE thunk=0xC3E9 mov r10d,7 -> parca7
+EDGE thunk=0xC3F2 mov r10d,8 -> parca8
+EDGE thunk=0xC3FB mov r10d,0xFE -> cleanup
+WARN V4 STREAM AKTIF: her cagride VirtualAlloc ile tek sayfa arena acilir, parcalar TEK TEK 32B'lik slot'a cozulur, WIPE-BEHIND oncekini siler; her an max 1 parca plaintext
+WARN ARENA-V3 kurali gecerli: ayni fonksiyonu ayni anda coklu thread'te cagirmayin (fallback yolu decrypt-once flagi kullanir); VirtualAlloc basarisizsa otomatik YERINDE stream'a duser (crash yok)
+FUNC ChecksumBlock 4256 231 54122 28 30
+JMP 4256
+JMP 54506
+JMP 54515
+JMP 54524
+JMP 54533
+JMP 54542
+JMP 54551
+JMP 54560
+JMP 54569
+JMP 54578
+JMP 54587
+JMP 54596
+JMP 54605
+JMP 54614
+JMP 54623
+JMP 54632
+JMP 54641
+JMP 54650
+JMP 54659
+JMP 54668
+JMP 54677
+JMP 54686
+JMP 54695
+JMP 54704
+JMP 54713
+JMP 54722
+JMP 54731
+JMP 54740
+JMP 54749
+JMP 54758
+INFO conv-reg: r12 (stage adresi tasiyici; cagirilan fonksiyonlar ABI geregi korur)
+INFO mod=V4-STREAM hardened=0 slot=32B maxPiece=24B template=362B conv=r12 arena=4096B
+BLK 00 enc=0x036A len=24 ops= 8 rva=0x10A0..0x10AC sites=1 crc=0x97
+BLK 01 enc=0x04AA len=16 ops= 3 rva=0x10AC..0x10B4 sites=1 crc=0x63
+BLK 02 enc=0x03A2 len=16 ops= 2 rva=0x10B4..0x10BC sites=2 crc=0xC4
+BLK 03 enc=0x0312 len=24 ops= 3 rva=0x10BC..0x10C8 sites=2 crc=0x17
+BLK 04 enc=0x03B2 len=24 ops= 4 rva=0x10C8..0x10D4 sites=1 crc=0x61
+BLK 05 enc=0x032A len=16 ops= 1 rva=0x10D4..0x10D6 sites=2 crc=0xE0
+BLK 06 enc=0x0392 len=16 ops= 1 rva=0x10D6..0x10E0 sites=1 crc=0x3B
+BLK 07 enc=0x04BA len=16 ops= 2 rva=0x10E0..0x10E5 sites=1 crc=0xE3
+BLK 08 enc=0x03F2 len=16 ops= 2 rva=0x10E5..0x10EB sites=2 crc=0x65
+BLK 09 enc=0x035A len=16 ops= 2 rva=0x10EB..0x10F5 sites=1 crc=0xD9
+BLK 10 enc=0x0462 len=16 ops= 2 rva=0x10F5..0x10FC sites=1 crc=0xA5
+BLK 11 enc=0x0422 len=16 ops= 1 rva=0x10FC..0x10FE sites=2 crc=0x4C
+BLK 12 enc=0x0432 len=16 ops= 3 rva=0x10FE..0x1108 sites=1 crc=0x42
+BLK 13 enc=0x034A len=16 ops= 3 rva=0x1108..0x1113 sites=1 crc=0x03
+BLK 14 enc=0x03CA len=16 ops= 4 rva=0x1113..0x111D sites=1 crc=0x70
+BLK 15 enc=0x0452 len=16 ops= 3 rva=0x111D..0x1128 sites=1 crc=0x93
+BLK 16 enc=0x0492 len=24 ops= 4 rva=0x1128..0x1134 sites=1 crc=0x62
+BLK 17 enc=0x04DA len=16 ops= 3 rva=0x1134..0x113E sites=1 crc=0x00
+BLK 18 enc=0x0382 len=16 ops= 2 rva=0x113E..0x1143 sites=2 crc=0x72
+BLK 19 enc=0x0482 len=16 ops= 2 rva=0x1143..0x1148 sites=2 crc=0xFB
+BLK 20 enc=0x04CA len=16 ops= 2 rva=0x1148..0x114D sites=2 crc=0x84
+BLK 21 enc=0x0442 len=16 ops= 1 rva=0x114D..0x1154 sites=2 crc=0x09
+BLK 22 enc=0x03EA len= 8 ops= 1 rva=0x1154..0x1157 sites=1 crc=0xB1
+BLK 23 enc=0x0402 len=16 ops= 2 rva=0x1157..0x1162 sites=2 crc=0xF1
+BLK 24 enc=0x0412 len=16 ops= 6 rva=0x1162..0x116D sites=1 crc=0x7E
+BLK 25 enc=0x0472 len=16 ops= 5 rva=0x116D..0x1176 sites=1 crc=0xE0
+BLK 26 enc=0x033A len=16 ops= 1 rva=0x1176..0x1180 sites=1 crc=0xA5
+BLK 27 enc=0x03DA len=16 ops= 3 rva=0x1180..0x1187 sites=2 crc=0xF2
+SITE blk=03 +0x03 kind=RIP val=0x7040
+SITE blk=03 +0x0D kind=THUNK val=0x4
+SITE blk=05 +0x01 kind=THUNK val=0xC
+SITE blk=05 +0x06 kind=THUNK val=0x6
+SITE blk=26 +0x0B kind=THUNK val=0x1B
+SITE blk=13 +0x0C kind=THUNK val=0xE
+SITE blk=09 +0x0B kind=THUNK val=0xA
+SITE blk=00 +0x0D kind=THUNK val=0x1
+SITE blk=18 +0x02 kind=THUNK val=0x7
+SITE blk=18 +0x0A kind=THUNK val=0x13
+SITE blk=06 +0x0B kind=THUNK val=0x7
+SITE blk=02 +0x02 kind=THUNK val=0x1B
+SITE blk=02 +0x09 kind=THUNK val=0x3
+SITE blk=04 +0x0D kind=THUNK val=0x5
+SITE blk=14 +0x0B kind=THUNK val=0xF
+SITE blk=27 +0x06 kind=THUNK val=0x17
+SITE blk=27 +0x0B kind=THUNK val=0xFE
+SITE blk=22 +0x04 kind=THUNK val=0x17
+SITE blk=08 +0x06 kind=THUNK val=0xA
+SITE blk=08 +0x0B kind=THUNK val=0x9
+SITE blk=23 +0x07 kind=RIP val=0x2000
+SITE blk=23 +0x0C kind=THUNK val=0x18
+SITE blk=24 +0x0C kind=THUNK val=0x19
+SITE blk=11 +0x02 kind=THUNK val=0x14
+SITE blk=11 +0x07 kind=THUNK val=0xC
+SITE blk=12 +0x0B kind=THUNK val=0xD
+SITE blk=21 +0x03 kind=RIP val=0x7040
+SITE blk=21 +0x08 kind=THUNK val=0x16
+SITE blk=15 +0x0C kind=THUNK val=0x10
+SITE blk=10 +0x08 kind=THUNK val=0xB
+SITE blk=25 +0x09 kind=THUNK val=0xFE
+SITE blk=19 +0x01 kind=THUNK val=0x8
+SITE blk=19 +0x09 kind=THUNK val=0x14
+SITE blk=16 +0x0D kind=THUNK val=0x11
+SITE blk=01 +0x09 kind=THUNK val=0x2
+SITE blk=07 +0x06 kind=THUNK val=0x8
+SITE blk=20 +0x05 kind=THUNK val=0x16
+SITE blk=20 +0x0A kind=THUNK val=0x15
+SITE blk=17 +0x0B kind=THUNK val=0x12
+EDGE thunk=0xD4EA mov r10d,0 -> parca0
+EDGE thunk=0xD4F3 mov r10d,1 -> parca1
+EDGE thunk=0xD4FC mov r10d,2 -> parca2
+EDGE thunk=0xD505 mov r10d,3 -> parca3
+EDGE thunk=0xD50E mov r10d,4 -> parca4
+EDGE thunk=0xD517 mov r10d,5 -> parca5
+EDGE thunk=0xD520 mov r10d,6 -> parca6
+EDGE thunk=0xD529 mov r10d,7 -> parca7
+EDGE thunk=0xD532 mov r10d,8 -> parca8
+EDGE thunk=0xD53B mov r10d,9 -> parca9
+EDGE thunk=0xD544 mov r10d,10 -> parca10
+EDGE thunk=0xD54D mov r10d,11 -> parca11
+EDGE thunk=0xD556 mov r10d,12 -> parca12
+EDGE thunk=0xD55F mov r10d,13 -> parca13
+EDGE thunk=0xD568 mov r10d,14 -> parca14
+EDGE thunk=0xD571 mov r10d,15 -> parca15
+EDGE thunk=0xD57A mov r10d,16 -> parca16
+EDGE thunk=0xD583 mov r10d,17 -> parca17
+EDGE thunk=0xD58C mov r10d,18 -> parca18
+EDGE thunk=0xD595 mov r10d,19 -> parca19
+EDGE thunk=0xD59E mov r10d,20 -> parca20
+EDGE thunk=0xD5A7 mov r10d,21 -> parca21
+EDGE thunk=0xD5B0 mov r10d,22 -> parca22
+EDGE thunk=0xD5B9 mov r10d,23 -> parca23
+EDGE thunk=0xD5C2 mov r10d,24 -> parca24
+EDGE thunk=0xD5CB mov r10d,25 -> parca25
+EDGE thunk=0xD5D4 mov r10d,26 -> parca26
+EDGE thunk=0xD5DD mov r10d,27 -> parca27
+EDGE thunk=0xD5E6 mov r10d,0xFE -> cleanup
+WARN V4 STREAM AKTIF: her cagride VirtualAlloc ile tek sayfa arena acilir, parcalar TEK TEK 32B'lik slot'a cozulur, WIPE-BEHIND oncekini siler; her an max 1 parca plaintext
+WARN ARENA-V3 kurali gecerli: ayni fonksiyonu ayni anda coklu thread'te cagirmayin (fallback yolu decrypt-once flagi kullanir); VirtualAlloc basarisizsa otomatik YERINDE stream'a duser (crash yok)
+FUNC MergeHash 4800 448 58498 49 51
+JMP 4800
+JMP 58994
+JMP 59003
+JMP 59012
+JMP 59021
+JMP 59030
+JMP 59039
+JMP 59048
+JMP 59057
+JMP 59066
+JMP 59075
+JMP 59084
+JMP 59093
+JMP 59102
+JMP 59111
+JMP 59120
+JMP 59129
+JMP 59138
+JMP 59147
+JMP 59156
+JMP 59165
+JMP 59174
+JMP 59183
+JMP 59192
+JMP 59201
+JMP 59210
+JMP 59219
+JMP 59228
+JMP 59237
+JMP 59246
+JMP 59255
+JMP 59264
+JMP 59273
+JMP 59282
+JMP 59291
+JMP 59300
+JMP 59309
+JMP 59318
+JMP 59327
+JMP 59336
+JMP 59345
+JMP 59354
+JMP 59363
+JMP 59372
+JMP 59381
+JMP 59390
+JMP 59399
+JMP 59408
+JMP 59417
+JMP 59426
+JMP 59435
+INFO conv-reg: r12 (stage adresi tasiyici; cagirilan fonksiyonlar ABI geregi korur)
+INFO mod=V4-STREAM hardened=0 slot=32B maxPiece=24B template=362B conv=r12 arena=4096B
+BLK 00 enc=0x0482 len=16 ops= 7 rva=0x12C0..0x12CA sites=1 crc=0xE6
+BLK 01 enc=0x04E2 len=24 ops= 3 rva=0x12CA..0x12D6 sites=2 crc=0x23
+BLK 02 enc=0x04D2 len=16 ops= 3 rva=0x12D6..0x12E1 sites=1 crc=0x40
+BLK 03 enc=0x03E2 len=16 ops= 1 rva=0x12E1..0x12EC sites=1 crc=0xA3
+BLK 04 enc=0x0462 len=16 ops= 1 rva=0x12EC..0x12F7 sites=1 crc=0x34
+BLK 05 enc=0x033A len=16 ops= 1 rva=0x12F7..0x1300 sites=1 crc=0x88
+BLK 06 enc=0x05AA len=16 ops= 3 rva=0x1300..0x1309 sites=1 crc=0xB4
+BLK 07 enc=0x0472 len=16 ops= 2 rva=0x1309..0x1312 sites=1 crc=0xE6
+BLK 08 enc=0x0402 len=16 ops= 1 rva=0x1312..0x1314 sites=2 crc=0x73
+BLK 09 enc=0x0312 len=16 ops= 1 rva=0x1314..0x131B sites=1 crc=0x1F
+BLK 10 enc=0x0412 len=16 ops= 2 rva=0x131B..0x1326 sites=2 crc=0x4A
+BLK 11 enc=0x053A len=16 ops= 3 rva=0x1326..0x1331 sites=2 crc=0xED
+BLK 12 enc=0x0582 len=16 ops= 2 rva=0x1331..0x1339 sites=1 crc=0x3F
+BLK 13 enc=0x0642 len=16 ops= 1 rva=0x1339..0x1343 sites=2 crc=0xB4
+BLK 14 enc=0x051A len=16 ops= 3 rva=0x1343..0x134E sites=2 crc=0xF3
+BLK 15 enc=0x03BA len=24 ops= 2 rva=0x134E..0x135A sites=2 crc=0xB1
+BLK 16 enc=0x0392 len=24 ops= 3 rva=0x135A..0x1366 sites=1 crc=0x98
+BLK 17 enc=0x061A len=24 ops= 3 rva=0x1366..0x1372 sites=1 crc=0xBB
+BLK 18 enc=0x050A len=16 ops= 2 rva=0x1372..0x137B sites=1 crc=0x2D
+BLK 19 enc=0x0322 len=24 ops= 3 rva=0x137B..0x1387 sites=1 crc=0x71
+BLK 20 enc=0x0372 len=16 ops= 2 rva=0x1387..0x1390 sites=1 crc=0x83
+BLK 21 enc=0x054A len=16 ops= 2 rva=0x1390..0x1399 sites=1 crc=0xA4
+BLK 22 enc=0x044A len=24 ops= 2 rva=0x1399..0x13A5 sites=2 crc=0xD0
+BLK 23 enc=0x0432 len=24 ops= 2 rva=0x13A5..0x13B1 sites=2 crc=0x3A
+BLK 24 enc=0x0662 len=16 ops= 2 rva=0x13B1..0x13BA sites=1 crc=0xF8
+BLK 25 enc=0x05EA len=16 ops= 2 rva=0x13BA..0x13C3 sites=1 crc=0x6A
+BLK 26 enc=0x0422 len=16 ops= 2 rva=0x13C3..0x13CC sites=1 crc=0xE7
+BLK 27 enc=0x035A len=24 ops= 2 rva=0x13CC..0x13D8 sites=2 crc=0xC4
+BLK 28 enc=0x03AA len=16 ops= 3 rva=0x13D8..0x13E0 sites=2 crc=0xBC
+BLK 29 enc=0x04C2 len=16 ops= 2 rva=0x13E0..0x13E7 sites=1 crc=0xC1
+BLK 30 enc=0x05BA len=16 ops= 2 rva=0x13E7..0x13ED sites=2 crc=0x4A
+BLK 31 enc=0x05DA len=16 ops= 2 rva=0x13ED..0x13F6 sites=1 crc=0xBA
+BLK 32 enc=0x03F2 len=16 ops= 2 rva=0x13F6..0x13FE sites=1 crc=0xC0
+BLK 33 enc=0x060A len=16 ops= 1 rva=0x13FE..0x1400 sites=2 crc=0x31
+BLK 34 enc=0x0572 len=16 ops= 3 rva=0x1400..0x140B sites=1 crc=0xE7
+BLK 35 enc=0x0592 len=24 ops= 5 rva=0x140B..0x1417 sites=1 crc=0x40
+BLK 36 enc=0x04A2 len=16 ops= 3 rva=0x1417..0x1422 sites=1 crc=0xBE
+BLK 37 enc=0x04FA len=16 ops= 4 rva=0x1422..0x142D sites=1 crc=0x5A
+BLK 38 enc=0x0652 len=16 ops= 3 rva=0x142D..0x1435 sites=1 crc=0xDB
+BLK 39 enc=0x0492 len=16 ops= 2 rva=0x1435..0x143A sites=2 crc=0xC7
+BLK 40 enc=0x04B2 len=16 ops= 2 rva=0x143A..0x1440 sites=2 crc=0x42
+BLK 41 enc=0x0382 len=16 ops= 2 rva=0x1440..0x1445 sites=2 crc=0x24
+BLK 42 enc=0x05FA len=16 ops= 1 rva=0x1445..0x144B sites=2 crc=0xEF
+BLK 43 enc=0x052A len=16 ops= 3 rva=0x144B..0x1456 sites=2 crc=0x6D
+BLK 44 enc=0x055A len=24 ops= 6 rva=0x1456..0x1462 sites=1 crc=0x9F
+BLK 45 enc=0x0632 len=16 ops= 5 rva=0x1462..0x146A sites=1 crc=0xB9
+BLK 46 enc=0x034A len=16 ops= 1 rva=0x146A..0x1470 sites=1 crc=0x21
+BLK 47 enc=0x03D2 len=16 ops= 2 rva=0x1470..0x147B sites=1 crc=0xA4
+BLK 48 enc=0x05CA len=16 ops= 1 rva=0x147B..0x1480 sites=2 crc=0x57
+SITE blk=09 +0x08 kind=THUNK val=0xA
+SITE blk=19 +0x0D kind=THUNK val=0x14
+SITE blk=05 +0x0A kind=THUNK val=0x6
+SITE blk=46 +0x07 kind=THUNK val=0x2F
+SITE blk=27 +0x04 kind=RIP val=0x2010
+SITE blk=27 +0x0D kind=THUNK val=0x1C
+SITE blk=20 +0x0A kind=THUNK val=0x15
+SITE blk=41 +0x05 kind=THUNK val=0x2B
+SITE blk=41 +0x0A kind=THUNK val=0x2A
+SITE blk=16 +0x0D kind=THUNK val=0x11
+SITE blk=28 +0x06 kind=THUNK val=0x22
+SITE blk=28 +0x0C kind=THUNK val=0x1D
+SITE blk=15 +0x08 kind=RIP val=0x2040
+SITE blk=15 +0x0D kind=THUNK val=0x10
+SITE blk=47 +0x0C kind=THUNK val=0x30
+SITE blk=03 +0x0C kind=THUNK val=0x4
+SITE blk=32 +0x09 kind=THUNK val=0x21
+SITE blk=08 +0x02 kind=THUNK val=0x6
+SITE blk=08 +0x07 kind=THUNK val=0x9
+SITE blk=10 +0x04 kind=RIP val=0x4080
+SITE blk=10 +0x0C kind=THUNK val=0xB
+SITE blk=26 +0x0A kind=THUNK val=0x1B
+SITE blk=23 +0x08 kind=RIP val=0x4090
+SITE blk=23 +0x0D kind=THUNK val=0x18
+SITE blk=22 +0x04 kind=RIP val=0x2000
+SITE blk=22 +0x0D kind=THUNK val=0x17
+SITE blk=04 +0x0C kind=THUNK val=0x5
+SITE blk=07 +0x0A kind=THUNK val=0x8
+SITE blk=00 +0x0B kind=THUNK val=0x1
+SITE blk=39 +0x02 kind=THUNK val=0x1D
+SITE blk=39 +0x0A kind=THUNK val=0x28
+SITE blk=36 +0x0C kind=THUNK val=0x25
+SITE blk=40 +0x01 kind=THUNK val=0x1E
+SITE blk=40 +0x0A kind=THUNK val=0x29
+SITE blk=29 +0x08 kind=THUNK val=0x1E
+SITE blk=02 +0x0C kind=THUNK val=0x3
+SITE blk=01 +0x08 kind=THUNK val=0x2F
+SITE blk=01 +0x0D kind=THUNK val=0x2
+SITE blk=37 +0x0C kind=THUNK val=0x26
+SITE blk=18 +0x0A kind=THUNK val=0x13
+SITE blk=14 +0x07 kind=RIP val=0x7040
+SITE blk=14 +0x0C kind=THUNK val=0xF
+SITE blk=43 +0x02 kind=RIP val=0x2020
+SITE blk=43 +0x0C kind=THUNK val=0x2C
+SITE blk=11 +0x07 kind=RIP val=0x7040
+SITE blk=11 +0x0C kind=THUNK val=0xC
+SITE blk=21 +0x0A kind=THUNK val=0x16
+SITE blk=44 +0x0D kind=THUNK val=0x2D
+SITE blk=34 +0x0C kind=THUNK val=0x23
+SITE blk=12 +0x09 kind=THUNK val=0xD
+SITE blk=35 +0x0D kind=THUNK val=0x24
+SITE blk=06 +0x0A kind=THUNK val=0x7
+SITE blk=30 +0x06 kind=THUNK val=0x20
+SITE blk=30 +0x0B kind=THUNK val=0x1F
+SITE blk=48 +0x01 kind=THUNK val=0xA
+SITE blk=48 +0x06 kind=THUNK val=0xFE
+SITE blk=31 +0x0A kind=THUNK val=0x20
+SITE blk=25 +0x0A kind=THUNK val=0x1A
+SITE blk=42 +0x02 kind=RIP val=0x7040
+SITE blk=42 +0x07 kind=THUNK val=0x2B
+SITE blk=33 +0x02 kind=THUNK val=0x29
+SITE blk=33 +0x07 kind=THUNK val=0x22
+SITE blk=17 +0x0D kind=THUNK val=0x12
+SITE blk=45 +0x08 kind=THUNK val=0xFE
+SITE blk=13 +0x02 kind=RIP val=0x2040
+SITE blk=13 +0x0B kind=THUNK val=0xE
+SITE blk=38 +0x09 kind=THUNK val=0x27
+SITE blk=24 +0x0A kind=THUNK val=0x19
+EDGE thunk=0xE672 mov r10d,0 -> parca0
+EDGE thunk=0xE67B mov r10d,1 -> parca1
+EDGE thunk=0xE684 mov r10d,2 -> parca2
+EDGE thunk=0xE68D mov r10d,3 -> parca3
+EDGE thunk=0xE696 mov r10d,4 -> parca4
+EDGE thunk=0xE69F mov r10d,5 -> parca5
+EDGE thunk=0xE6A8 mov r10d,6 -> parca6
+EDGE thunk=0xE6B1 mov r10d,7 -> parca7
+EDGE thunk=0xE6BA mov r10d,8 -> parca8
+EDGE thunk=0xE6C3 mov r10d,9 -> parca9
+EDGE thunk=0xE6CC mov r10d,10 -> parca10
+EDGE thunk=0xE6D5 mov r10d,11 -> parca11
+EDGE thunk=0xE6DE mov r10d,12 -> parca12
+EDGE thunk=0xE6E7 mov r10d,13 -> parca13
+EDGE thunk=0xE6F0 mov r10d,14 -> parca14
+EDGE thunk=0xE6F9 mov r10d,15 -> parca15
+EDGE thunk=0xE702 mov r10d,16 -> parca16
+EDGE thunk=0xE70B mov r10d,17 -> parca17
+EDGE thunk=0xE714 mov r10d,18 -> parca18
+EDGE thunk=0xE71D mov r10d,19 -> parca19
+EDGE thunk=0xE726 mov r10d,20 -> parca20
+EDGE thunk=0xE72F mov r10d,21 -> parca21
+EDGE thunk=0xE738 mov r10d,22 -> parca22
+EDGE thunk=0xE741 mov r10d,23 -> parca23
+EDGE thunk=0xE74A mov r10d,24 -> parca24
+EDGE thunk=0xE753 mov r10d,25 -> parca25
+EDGE thunk=0xE75C mov r10d,26 -> parca26
+EDGE thunk=0xE765 mov r10d,27 -> parca27
+EDGE thunk=0xE76E mov r10d,28 -> parca28
+EDGE thunk=0xE777 mov r10d,29 -> parca29
+EDGE thunk=0xE780 mov r10d,30 -> parca30
+EDGE thunk=0xE789 mov r10d,31 -> parca31
+EDGE thunk=0xE792 mov r10d,32 -> parca32
+EDGE thunk=0xE79B mov r10d,33 -> parca33
+EDGE thunk=0xE7A4 mov r10d,34 -> parca34
+EDGE thunk=0xE7AD mov r10d,35 -> parca35
+EDGE thunk=0xE7B6 mov r10d,36 -> parca36
+EDGE thunk=0xE7BF mov r10d,37 -> parca37
+EDGE thunk=0xE7C8 mov r10d,38 -> parca38
+EDGE thunk=0xE7D1 mov r10d,39 -> parca39
+EDGE thunk=0xE7DA mov r10d,40 -> parca40
+EDGE thunk=0xE7E3 mov r10d,41 -> parca41
+EDGE thunk=0xE7EC mov r10d,42 -> parca42
+EDGE thunk=0xE7F5 mov r10d,43 -> parca43
+EDGE thunk=0xE7FE mov r10d,44 -> parca44
+EDGE thunk=0xE807 mov r10d,45 -> parca45
+EDGE thunk=0xE810 mov r10d,46 -> parca46
+EDGE thunk=0xE819 mov r10d,47 -> parca47
+EDGE thunk=0xE822 mov r10d,48 -> parca48
+EDGE thunk=0xE82B mov r10d,0xFE -> cleanup
+WARN V4 STREAM AKTIF: her cagride VirtualAlloc ile tek sayfa arena acilir, parcalar TEK TEK 32B'lik slot'a cozulur, WIPE-BEHIND oncekini siler; her an max 1 parca plaintext
+WARN ARENA-V3 kurali gecerli: ayni fonksiyonu ayni anda coklu thread'te cagirmayin (fallback yolu decrypt-once flagi kullanir); VirtualAlloc basarisizsa otomatik YERINDE stream'a duser (crash yok)
+FUNC ClampAdd 4496 32 62242 3 5
+JMP 4496
+JMP 62274
+JMP 62283
+JMP 62292
+JMP 62301
+INFO conv-reg: r12 (stage adresi tasiyici; cagirilan fonksiyonlar ABI geregi korur)
+INFO mod=V4-STREAM hardened=0 slot=16B maxPiece=16B template=362B conv=r12 arena=4096B
+BLK 00 enc=0x0322 len=16 ops= 3 rva=0x1190..0x119B sites=1 crc=0x2A
+BLK 01 enc=0x0332 len=16 ops= 3 rva=0x119B..0x11A4 sites=1 crc=0xEC
+BLK 02 enc=0x0312 len=16 ops= 4 rva=0x11A4..0x11B0 sites=2 crc=0x90
+SITE blk=02 +0x02 kind=RIP val=0x7040
+SITE blk=02 +0x0C kind=THUNK val=0xFE
+SITE blk=00 +0x0C kind=THUNK val=0x1
+SITE blk=01 +0x0A kind=THUNK val=0x2
+EDGE thunk=0xF342 mov r10d,0 -> parca0
+EDGE thunk=0xF34B mov r10d,1 -> parca1
+EDGE thunk=0xF354 mov r10d,2 -> parca2
+EDGE thunk=0xF35D mov r10d,0xFE -> cleanup
+WARN V4 STREAM AKTIF: her cagride VirtualAlloc ile tek sayfa arena acilir, parcalar TEK TEK 32B'lik slot'a cozulur, WIPE-BEHIND oncekini siler; her an max 1 parca plaintext
+WARN ARENA-V3 kurali gecerli: ayni fonksiyonu ayni anda coklu thread'te cagirmayin (fallback yolu decrypt-once flagi kullanir); VirtualAlloc basarisizsa otomatik YERINDE stream'a duser (crash yok)
+# TOPLAM: 6 fonksiyon korundu, 0 atlandi, 0 kapsam-disi (MP_ONLY), 113 JMP, 0 yem blok

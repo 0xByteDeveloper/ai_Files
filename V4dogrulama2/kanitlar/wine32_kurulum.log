@@ -1,0 +1,4 @@
+=== 0/9 ortam kontrolü ===
+OS: Debian GNU/Linux 13 (trixie) | suite=trixie | HOME=/home/z | ld.so hedefi=/home/z/l/ld.so
+=== 2/9 root'suz paketler (libc6:i386, libgcc-s1:i386, patchelf, qemu-user) ===
+=== 1/9 apt update (kullanıcı ağacı, trixie) ===

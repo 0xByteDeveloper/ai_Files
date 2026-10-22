@@ -1,0 +1,413 @@
+# MazeMap - i4M MazeProtector (Jump labirenti haritasi)
+# Format: FUNC <isim> <fnRva> <fnSize> <entryRva> <chunk> <jmpSayisi> sonra JMP satirlari
+# RVA'lar ImageBase'e gore. Cheat Engine: modulBase + RVA
+# MODE ARENA-V4-STREAM (god-tier, MP_STREAM): parcalar TEK TEK tek bir 32B slot'a
+#  cozulur, WIPE-BEHIND oncekini siler -> her an arenada max 1 parca plaintext;
+#  tam fonksiyon HICBIR an bitisik var olmaz. G1: slot her cagride rastgele adrese
+#  duser (dump-replay olur). G2: CRC-8 parca butunlugu (anti-patch). G3: %25 decoy
+#  enjeksiyonu. Kenarlar .maze'deki 9B thunk'lardan gecer; duvar varsa jne alinir
+#  ve px/ny parcasi o cagride HIC cozulmez (lazy cold-path).
+FUNC GameLoop 4440 696 284027 81 83
+JMP 4440
+JMP 285376
+JMP 285385
+JMP 285394
+JMP 285403
+JMP 285412
+JMP 285421
+JMP 285430
+JMP 285439
+JMP 285448
+JMP 285457
+JMP 285466
+JMP 285475
+JMP 285484
+JMP 285493
+JMP 285502
+JMP 285511
+JMP 285520
+JMP 285529
+JMP 285538
+JMP 285547
+JMP 285556
+JMP 285565
+JMP 285574
+JMP 285583
+JMP 285592
+JMP 285601
+JMP 285610
+JMP 285619
+JMP 285628
+JMP 285637
+JMP 285646
+JMP 285655
+JMP 285664
+JMP 285673
+JMP 285682
+JMP 285691
+JMP 285700
+JMP 285709
+JMP 285718
+JMP 285727
+JMP 285736
+JMP 285745
+JMP 285754
+JMP 285763
+JMP 285772
+JMP 285781
+JMP 285790
+JMP 285799
+JMP 285808
+JMP 285817
+JMP 285826
+JMP 285835
+JMP 285844
+JMP 285853
+JMP 285862
+JMP 285871
+JMP 285880
+JMP 285889
+JMP 285898
+JMP 285907
+JMP 285916
+JMP 285925
+JMP 285934
+JMP 285943
+JMP 285952
+JMP 285961
+JMP 285970
+JMP 285979
+JMP 285988
+JMP 285997
+JMP 286006
+JMP 286015
+JMP 286024
+JMP 286033
+JMP 286042
+JMP 286051
+JMP 286060
+JMP 286069
+JMP 286078
+JMP 286087
+JMP 286096
+JMP 286105
+INFO conv-reg: r12 (stage adresi tasiyici; cagirilan fonksiyonlar ABI geregi korur)
+INFO mod=V4-STREAM hardened=1 slot=32B maxPiece=24B template=521B conv=r12 arena=4096B
+BLK 00 enc=0x057B len=16 ops= 2 rva=0x1158..0x1162 sites=2 crc=0x62
+BLK 01 enc=0x04C3 len= 8 ops= 1 rva=0x1162..0x1165 sites=1 crc=0x50
+BLK 02 enc=0x0543 len=24 ops= 3 rva=0x1165..0x1171 sites=2 crc=0x02
+BLK 03 enc=0x03EB len=16 ops= 1 rva=0x1171..0x1176 sites=2 crc=0x3F
+BLK 04 enc=0x051B len=24 ops= 4 rva=0x1176..0x1182 sites=1 crc=0xE3
+BLK 05 enc=0x0813 len=16 ops= 1 rva=0x1182..0x1184 sites=2 crc=0xA9
+BLK 06 enc=0x0803 len=16 ops= 2 rva=0x1184..0x118C sites=1 crc=0x21
+BLK 07 enc=0x067B len=24 ops= 3 rva=0x118C..0x1198 sites=2 crc=0xFF
+BLK 08 enc=0x06FB len=16 ops= 1 rva=0x1198..0x119D sites=2 crc=0x19
+BLK 09 enc=0x0763 len=24 ops= 4 rva=0x119D..0x11A9 sites=1 crc=0xE4
+BLK 10 enc=0x0533 len=16 ops= 1 rva=0x11A9..0x11AB sites=2 crc=0x6F
+BLK 11 enc=0x0893 len=24 ops= 3 rva=0x11AB..0x11B7 sites=2 crc=0x5C
+BLK 12 enc=0x08DB len=24 ops= 3 rva=0x11B7..0x11C3 sites=2 crc=0x6D
+BLK 13 enc=0x06C3 len=24 ops= 3 rva=0x11C3..0x11CF sites=2 crc=0x1C
+BLK 14 enc=0x08C3 len=24 ops= 3 rva=0x11CF..0x11DB sites=2 crc=0x2D
+BLK 15 enc=0x0733 len=16 ops= 1 rva=0x11DB..0x11E0 sites=2 crc=0x8C
+BLK 16 enc=0x077B len=16 ops= 2 rva=0x11E0..0x11E9 sites=2 crc=0x64
+BLK 17 enc=0x0883 len=16 ops= 2 rva=0x11E9..0x11F4 sites=2 crc=0x7F
+BLK 18 enc=0x0613 len=16 ops= 1 rva=0x11F4..0x11F6 sites=2 crc=0x82
+BLK 19 enc=0x059B len=16 ops= 1 rva=0x11F6..0x11FB sites=1 crc=0x82
+BLK 20 enc=0x046B len=16 ops= 2 rva=0x11FB..0x1204 sites=2 crc=0xEB
+BLK 21 enc=0x04B3 len=16 ops= 1 rva=0x1204..0x1209 sites=2 crc=0xD8
+BLK 22 enc=0x0643 len=16 ops= 2 rva=0x1209..0x1213 sites=2 crc=0x7D
+BLK 23 enc=0x056B len=16 ops= 1 rva=0x1213..0x1218 sites=1 crc=0x18
+BLK 24 enc=0x0903 len=16 ops= 2 rva=0x1218..0x1222 sites=2 crc=0x6E
+BLK 25 enc=0x03DB len=16 ops= 3 rva=0x1222..0x122B sites=1 crc=0x01
+BLK 26 enc=0x040B len=16 ops= 2 rva=0x122B..0x1235 sites=3 crc=0x90
+BLK 27 enc=0x042B len=16 ops= 3 rva=0x1235..0x1240 sites=2 crc=0x24
+BLK 28 enc=0x0823 len=16 ops= 2 rva=0x1240..0x1249 sites=2 crc=0x7F
+BLK 29 enc=0x048B len=16 ops= 2 rva=0x1249..0x1251 sites=2 crc=0xE4
+BLK 30 enc=0x049B len=24 ops= 2 rva=0x1251..0x125D sites=3 crc=0x60
+BLK 31 enc=0x07E3 len=16 ops= 2 rva=0x125D..0x1266 sites=2 crc=0x62
+BLK 32 enc=0x0743 len=16 ops= 2 rva=0x1266..0x126D sites=2 crc=0x68
+BLK 33 enc=0x058B len=16 ops= 1 rva=0x126D..0x1272 sites=1 crc=0xC7
+BLK 34 enc=0x05F3 len=16 ops= 2 rva=0x1272..0x127B sites=2 crc=0xF0
+BLK 35 enc=0x05CB len=16 ops= 1 rva=0x127B..0x1280 sites=2 crc=0xD8
+BLK 36 enc=0x043B len=24 ops= 2 rva=0x1280..0x128C sites=3 crc=0x5F
+BLK 37 enc=0x08F3 len=16 ops= 1 rva=0x128C..0x1293 sites=2 crc=0x1D
+BLK 38 enc=0x04DB len=16 ops= 3 rva=0x1293..0x129E sites=1 crc=0x29
+BLK 39 enc=0x0603 len=16 ops= 3 rva=0x129E..0x12A9 sites=2 crc=0x7B
+BLK 40 enc=0x0833 len=16 ops= 1 rva=0x12A9..0x12AE sites=2 crc=0x7C
+BLK 41 enc=0x04EB len=16 ops= 3 rva=0x12AE..0x12B9 sites=2 crc=0x1B
+BLK 42 enc=0x05AB len=16 ops= 2 rva=0x12B9..0x12C2 sites=2 crc=0x78
+BLK 43 enc=0x07F3 len=16 ops= 2 rva=0x12C2..0x12CA sites=2 crc=0xE8
+BLK 44 enc=0x079B len=16 ops= 2 rva=0x12CA..0x12D5 sites=2 crc=0x42
+BLK 45 enc=0x06DB len=16 ops= 2 rva=0x12D5..0x12DF sites=2 crc=0xA1
+BLK 46 enc=0x070B len=16 ops= 3 rva=0x12DF..0x12E8 sites=1 crc=0xB9
+BLK 47 enc=0x07BB len=16 ops= 2 rva=0x12E8..0x12F2 sites=3 crc=0xE0
+BLK 48 enc=0x07AB len=16 ops= 2 rva=0x12F2..0x12FA sites=1 crc=0x72
+BLK 49 enc=0x0863 len=16 ops= 2 rva=0x12FA..0x1302 sites=1 crc=0x5E
+BLK 50 enc=0x078B len=16 ops= 3 rva=0x1302..0x130D sites=2 crc=0x02
+BLK 51 enc=0x066B len=16 ops= 2 rva=0x130D..0x1318 sites=3 crc=0xAC
+BLK 52 enc=0x071B len=24 ops= 4 rva=0x1318..0x1324 sites=1 crc=0x63
+BLK 53 enc=0x0633 len=16 ops= 1 rva=0x1324..0x1326 sites=2 crc=0xCB
+BLK 54 enc=0x0923 len=16 ops= 3 rva=0x1326..0x1330 sites=1 crc=0xAB
+BLK 55 enc=0x0653 len=24 ops= 3 rva=0x1330..0x133C sites=2 crc=0x35
+BLK 56 enc=0x04FB len=16 ops= 3 rva=0x133C..0x1347 sites=2 crc=0xA4
+BLK 57 enc=0x03CB len=16 ops= 3 rva=0x1347..0x1351 sites=1 crc=0x42
+BLK 58 enc=0x0453 len=24 ops= 3 rva=0x1351..0x135D sites=2 crc=0x6E
+BLK 59 enc=0x047B len=16 ops= 3 rva=0x135D..0x1368 sites=2 crc=0x4C
+BLK 60 enc=0x0623 len=16 ops= 2 rva=0x1368..0x1370 sites=1 crc=0x6C
+BLK 61 enc=0x0933 len=16 ops= 2 rva=0x1370..0x137A sites=2 crc=0x98
+BLK 62 enc=0x0753 len=16 ops= 3 rva=0x137A..0x1385 sites=2 crc=0x7F
+BLK 63 enc=0x06B3 len=16 ops= 2 rva=0x1385..0x138D sites=1 crc=0xC0
+BLK 64 enc=0x06A3 len=16 ops= 1 rva=0x138D..0x1392 sites=2 crc=0x77
+BLK 65 enc=0x0693 len=16 ops= 1 rva=0x1392..0x1394 sites=2 crc=0x8A
+BLK 66 enc=0x05DB len=24 ops= 3 rva=0x1394..0x13A0 sites=2 crc=0x64
+BLK 67 enc=0x0873 len=16 ops= 1 rva=0x13A0..0x13A5 sites=2 crc=0xFB
+BLK 68 enc=0x06EB len=16 ops= 2 rva=0x13A5..0x13AF sites=2 crc=0x18
+BLK 69 enc=0x055B len=16 ops= 2 rva=0x13AF..0x13B7 sites=2 crc=0x77
+BLK 70 enc=0x0853 len=16 ops= 1 rva=0x13B7..0x13BC sites=2 crc=0x20
+BLK 71 enc=0x050B len=16 ops= 2 rva=0x13BC..0x13C6 sites=2 crc=0xD3
+BLK 72 enc=0x08B3 len=16 ops= 2 rva=0x13C6..0x13CE sites=2 crc=0x08
+BLK 73 enc=0x041B len=16 ops= 1 rva=0x13CE..0x13D3 sites=2 crc=0x5D
+BLK 74 enc=0x0843 len=16 ops= 2 rva=0x13D3..0x13DB sites=1 crc=0x03
+BLK 75 enc=0x0913 len=16 ops= 2 rva=0x13DB..0x13E5 sites=2 crc=0x1E
+BLK 76 enc=0x03FB len=16 ops= 3 rva=0x13E5..0x13F0 sites=2 crc=0xE5
+BLK 77 enc=0x05BB len=16 ops= 2 rva=0x13F0..0x13F9 sites=2 crc=0xC4
+BLK 78 enc=0x04CB len=16 ops= 2 rva=0x13F9..0x1403 sites=2 crc=0xDA
+BLK 79 enc=0x07CB len=24 ops= 4 rva=0x1403..0x140F sites=2 crc=0xB7
+BLK 80 enc=0x08AB len= 8 ops= 1 rva=0x140F..0x1410 sites=1 crc=0xC8
+SITE blk=57 +0x0B kind=THUNK val=0x3A
+SITE blk=25 +0x0A kind=THUNK val=0x1A
+SITE blk=03 +0x01 kind=THUNK val=0x6
+SITE blk=03 +0x06 kind=THUNK val=0x4
+SITE blk=76 +0x07 kind=MODUL val=0x10CA
+SITE blk=76 +0x0C kind=THUNK val=0x4D
+SITE blk=26 +0x01 kind=MODUL val=0x10CA
+SITE blk=26 +0x06 kind=THUNK val=0x46
+SITE blk=26 +0x0B kind=THUNK val=0x1B
+SITE blk=73 +0x01 kind=THUNK val=0x4
+SITE blk=73 +0x06 kind=THUNK val=0x4A
+SITE blk=27 +0x05 kind=RIP val=0x22390
+SITE blk=27 +0x0C kind=THUNK val=0x1C
+SITE blk=36 +0x03 kind=RIP val=0x202E
+SITE blk=36 +0x08 kind=THUNK val=0x26
+SITE blk=36 +0x0D kind=THUNK val=0x25
+SITE blk=58 +0x03 kind=RIP val=0x22390
+SITE blk=58 +0x0D kind=THUNK val=0x3B
+SITE blk=20 +0x05 kind=THUNK val=0x16
+SITE blk=20 +0x0A kind=THUNK val=0x15
+SITE blk=59 +0x07 kind=THUNK val=0x41
+SITE blk=59 +0x0C kind=THUNK val=0x3C
+SITE blk=29 +0x02 kind=RIP val=0x2390
+SITE blk=29 +0x09 kind=THUNK val=0x1E
+SITE blk=30 +0x02 kind=THUNK val=0x29
+SITE blk=30 +0x08 kind=RIP val=0x2000
+SITE blk=30 +0x0D kind=THUNK val=0x1F
+SITE blk=21 +0x01 kind=THUNK val=0x17
+SITE blk=21 +0x06 kind=THUNK val=0x16
+SITE blk=01 +0x04 kind=THUNK val=0x2
+SITE blk=78 +0x03 kind=RIP val=0x2042
+SITE blk=78 +0x0B kind=THUNK val=0x4F
+SITE blk=38 +0x0C kind=THUNK val=0x27
+SITE blk=41 +0x05 kind=RIP val=0x2010
+SITE blk=41 +0x0C kind=THUNK val=0x2A
+SITE blk=56 +0x07 kind=THUNK val=0x41
+SITE blk=56 +0x0C kind=THUNK val=0x39
+SITE blk=71 +0x03 kind=RIP val=0x203A
+SITE blk=71 +0x0B kind=THUNK val=0x48
+SITE blk=04 +0x0D kind=THUNK val=0x5
+SITE blk=10 +0x01 kind=THUNK val=0x7
+SITE blk=10 +0x06 kind=THUNK val=0xB
+SITE blk=02 +0x08 kind=THUNK val=0x4A
+SITE blk=02 +0x0D kind=THUNK val=0x3
+SITE blk=69 +0x04 kind=MODUL val=0x1BE0
+SITE blk=69 +0x09 kind=THUNK val=0x46
+SITE blk=23 +0x06 kind=THUNK val=0x18
+SITE blk=00 +0x01 kind=MODUL val=0x1090
+SITE blk=00 +0x0B kind=THUNK val=0x1
+SITE blk=33 +0x06 kind=THUNK val=0x22
+SITE blk=19 +0x06 kind=THUNK val=0x14
+SITE blk=42 +0x02 kind=THUNK val=0x30
+SITE blk=42 +0x0A kind=THUNK val=0x2B
+SITE blk=77 +0x02 kind=RIP val=0x2004
+SITE blk=77 +0x0A kind=THUNK val=0x4E
+SITE blk=35 +0x01 kind=THUNK val=0x25
+SITE blk=35 +0x06 kind=THUNK val=0x24
+SITE blk=66 +0x08 kind=THUNK val=0x44
+SITE blk=66 +0x0D kind=THUNK val=0x43
+SITE blk=34 +0x05 kind=THUNK val=0x24
+SITE blk=34 +0x0A kind=THUNK val=0x23
+SITE blk=39 +0x07 kind=MODUL val=0x10CA
+SITE blk=39 +0x0C kind=THUNK val=0x28
+SITE blk=18 +0x01 kind=THUNK val=0x14
+SITE blk=18 +0x06 kind=THUNK val=0x13
+SITE blk=60 +0x09 kind=THUNK val=0x3D
+SITE blk=53 +0x01 kind=THUNK val=0x32
+SITE blk=53 +0x06 kind=THUNK val=0x36
+SITE blk=22 +0x06 kind=THUNK val=0x18
+SITE blk=22 +0x0B kind=THUNK val=0x17
+SITE blk=55 +0x03 kind=RIP val=0x2390
+SITE blk=55 +0x0D kind=THUNK val=0x38
+SITE blk=51 +0x02 kind=THUNK val=0x42
+SITE blk=51 +0x07 kind=THUNK val=0x36
+SITE blk=51 +0x0C kind=THUNK val=0x34
+SITE blk=07 +0x08 kind=THUNK val=0x47
+SITE blk=07 +0x0D kind=THUNK val=0x8
+SITE blk=65 +0x01 kind=THUNK val=0x34
+SITE blk=65 +0x06 kind=THUNK val=0x42
+SITE blk=64 +0x01 kind=THUNK val=0x42
+SITE blk=64 +0x06 kind=THUNK val=0x41
+SITE blk=63 +0x09 kind=THUNK val=0x40
+SITE blk=13 +0x08 kind=THUNK val=0x10
+SITE blk=13 +0x0D kind=THUNK val=0xE
+SITE blk=45 +0x06 kind=RIP val=0x2031
+SITE blk=45 +0x0B kind=THUNK val=0x2E
+SITE blk=68 +0x03 kind=RIP val=0x2037
+SITE blk=68 +0x0B kind=THUNK val=0x45
+SITE blk=08 +0x01 kind=THUNK val=0xB
+SITE blk=08 +0x06 kind=THUNK val=0x9
+SITE blk=46 +0x0A kind=THUNK val=0x2F
+SITE blk=52 +0x0D kind=THUNK val=0x35
+SITE blk=15 +0x01 kind=THUNK val=0x1B
+SITE blk=15 +0x06 kind=THUNK val=0x10
+SITE blk=32 +0x06 kind=THUNK val=0x22
+SITE blk=32 +0x0B kind=THUNK val=0x21
+SITE blk=62 +0x07 kind=MODUL val=0x10CA
+SITE blk=62 +0x0C kind=THUNK val=0x3F
+SITE blk=09 +0x0D kind=THUNK val=0xA
+SITE blk=16 +0x02 kind=RIP val=0x2000
+SITE blk=16 +0x0A kind=THUNK val=0x11
+SITE blk=50 +0x05 kind=RIP val=0x2008
+SITE blk=50 +0x0C kind=THUNK val=0x33
+SITE blk=44 +0x02 kind=THUNK val=0x30
+SITE blk=44 +0x0C kind=THUNK val=0x2D
+SITE blk=48 +0x09 kind=THUNK val=0x31
+SITE blk=47 +0x01 kind=MODUL val=0x10CA
+SITE blk=47 +0x06 kind=THUNK val=0x46
+SITE blk=47 +0x0B kind=THUNK val=0x30
+SITE blk=79 +0x07 kind=MODUL val=0x1BE0
+SITE blk=79 +0x0D kind=THUNK val=0x50
+SITE blk=31 +0x05 kind=THUNK val=0x21
+SITE blk=31 +0x0A kind=THUNK val=0x20
+SITE blk=43 +0x02 kind=RIP val=0x200C
+SITE blk=43 +0x09 kind=THUNK val=0x2C
+SITE blk=06 +0x09 kind=THUNK val=0x7
+SITE blk=05 +0x01 kind=THUNK val=0x2
+SITE blk=05 +0x06 kind=THUNK val=0x6
+SITE blk=28 +0x02 kind=THUNK val=0x29
+SITE blk=28 +0x0A kind=THUNK val=0x1D
+SITE blk=40 +0x01 kind=THUNK val=0x46
+SITE blk=40 +0x06 kind=THUNK val=0x29
+SITE blk=74 +0x09 kind=THUNK val=0x4B
+SITE blk=70 +0x01 kind=THUNK val=0x9
+SITE blk=70 +0x06 kind=THUNK val=0x47
+SITE blk=49 +0x09 kind=THUNK val=0x32
+SITE blk=67 +0x01 kind=THUNK val=0x46
+SITE blk=67 +0x06 kind=THUNK val=0x44
+SITE blk=17 +0x02 kind=THUNK val=0x13
+SITE blk=17 +0x0C kind=THUNK val=0x12
+SITE blk=11 +0x08 kind=THUNK val=0x10
+SITE blk=11 +0x0D kind=THUNK val=0xC
+SITE blk=80 +0x01 kind=THUNK val=0xFE
+SITE blk=72 +0x04 kind=MODUL val=0x1BE0
+SITE blk=72 +0x09 kind=THUNK val=0x49
+SITE blk=14 +0x08 kind=THUNK val=0x10
+SITE blk=14 +0x0D kind=THUNK val=0xF
+SITE blk=12 +0x08 kind=THUNK val=0x10
+SITE blk=12 +0x0D kind=THUNK val=0xD
+SITE blk=37 +0x03 kind=RIP val=0x202B
+SITE blk=37 +0x08 kind=THUNK val=0x26
+SITE blk=24 +0x06 kind=RIP val=0x2028
+SITE blk=24 +0x0B kind=THUNK val=0x19
+SITE blk=75 +0x03 kind=RIP val=0x203C
+SITE blk=75 +0x0B kind=THUNK val=0x4C
+SITE blk=54 +0x0B kind=THUNK val=0x37
+SITE blk=61 +0x03 kind=RIP val=0x2034
+SITE blk=61 +0x0B kind=THUNK val=0x3E
+EDGE thunk=0x45AC0 mov r10d,0 -> parca0
+EDGE thunk=0x45AC9 mov r10d,1 -> parca1
+EDGE thunk=0x45AD2 mov r10d,2 -> parca2
+EDGE thunk=0x45ADB mov r10d,3 -> parca3
+EDGE thunk=0x45AE4 mov r10d,4 -> parca4
+EDGE thunk=0x45AED mov r10d,5 -> parca5
+EDGE thunk=0x45AF6 mov r10d,6 -> parca6
+EDGE thunk=0x45AFF mov r10d,7 -> parca7
+EDGE thunk=0x45B08 mov r10d,8 -> parca8
+EDGE thunk=0x45B11 mov r10d,9 -> parca9
+EDGE thunk=0x45B1A mov r10d,10 -> parca10
+EDGE thunk=0x45B23 mov r10d,11 -> parca11
+EDGE thunk=0x45B2C mov r10d,12 -> parca12
+EDGE thunk=0x45B35 mov r10d,13 -> parca13
+EDGE thunk=0x45B3E mov r10d,14 -> parca14
+EDGE thunk=0x45B47 mov r10d,15 -> parca15
+EDGE thunk=0x45B50 mov r10d,16 -> parca16
+EDGE thunk=0x45B59 mov r10d,17 -> parca17
+EDGE thunk=0x45B62 mov r10d,18 -> parca18
+EDGE thunk=0x45B6B mov r10d,19 -> parca19
+EDGE thunk=0x45B74 mov r10d,20 -> parca20
+EDGE thunk=0x45B7D mov r10d,21 -> parca21
+EDGE thunk=0x45B86 mov r10d,22 -> parca22
+EDGE thunk=0x45B8F mov r10d,23 -> parca23
+EDGE thunk=0x45B98 mov r10d,24 -> parca24
+EDGE thunk=0x45BA1 mov r10d,25 -> parca25
+EDGE thunk=0x45BAA mov r10d,26 -> parca26
+EDGE thunk=0x45BB3 mov r10d,27 -> parca27
+EDGE thunk=0x45BBC mov r10d,28 -> parca28
+EDGE thunk=0x45BC5 mov r10d,29 -> parca29
+EDGE thunk=0x45BCE mov r10d,30 -> parca30
+EDGE thunk=0x45BD7 mov r10d,31 -> parca31
+EDGE thunk=0x45BE0 mov r10d,32 -> parca32
+EDGE thunk=0x45BE9 mov r10d,33 -> parca33
+EDGE thunk=0x45BF2 mov r10d,34 -> parca34
+EDGE thunk=0x45BFB mov r10d,35 -> parca35
+EDGE thunk=0x45C04 mov r10d,36 -> parca36
+EDGE thunk=0x45C0D mov r10d,37 -> parca37
+EDGE thunk=0x45C16 mov r10d,38 -> parca38
+EDGE thunk=0x45C1F mov r10d,39 -> parca39
+EDGE thunk=0x45C28 mov r10d,40 -> parca40
+EDGE thunk=0x45C31 mov r10d,41 -> parca41
+EDGE thunk=0x45C3A mov r10d,42 -> parca42
+EDGE thunk=0x45C43 mov r10d,43 -> parca43
+EDGE thunk=0x45C4C mov r10d,44 -> parca44
+EDGE thunk=0x45C55 mov r10d,45 -> parca45
+EDGE thunk=0x45C5E mov r10d,46 -> parca46
+EDGE thunk=0x45C67 mov r10d,47 -> parca47
+EDGE thunk=0x45C70 mov r10d,48 -> parca48
+EDGE thunk=0x45C79 mov r10d,49 -> parca49
+EDGE thunk=0x45C82 mov r10d,50 -> parca50
+EDGE thunk=0x45C8B mov r10d,51 -> parca51
+EDGE thunk=0x45C94 mov r10d,52 -> parca52
+EDGE thunk=0x45C9D mov r10d,53 -> parca53
+EDGE thunk=0x45CA6 mov r10d,54 -> parca54
+EDGE thunk=0x45CAF mov r10d,55 -> parca55
+EDGE thunk=0x45CB8 mov r10d,56 -> parca56
+EDGE thunk=0x45CC1 mov r10d,57 -> parca57
+EDGE thunk=0x45CCA mov r10d,58 -> parca58
+EDGE thunk=0x45CD3 mov r10d,59 -> parca59
+EDGE thunk=0x45CDC mov r10d,60 -> parca60
+EDGE thunk=0x45CE5 mov r10d,61 -> parca61
+EDGE thunk=0x45CEE mov r10d,62 -> parca62
+EDGE thunk=0x45CF7 mov r10d,63 -> parca63
+EDGE thunk=0x45D00 mov r10d,64 -> parca64
+EDGE thunk=0x45D09 mov r10d,65 -> parca65
+EDGE thunk=0x45D12 mov r10d,66 -> parca66
+EDGE thunk=0x45D1B mov r10d,67 -> parca67
+EDGE thunk=0x45D24 mov r10d,68 -> parca68
+EDGE thunk=0x45D2D mov r10d,69 -> parca69
+EDGE thunk=0x45D36 mov r10d,70 -> parca70
+EDGE thunk=0x45D3F mov r10d,71 -> parca71
+EDGE thunk=0x45D48 mov r10d,72 -> parca72
+EDGE thunk=0x45D51 mov r10d,73 -> parca73
+EDGE thunk=0x45D5A mov r10d,74 -> parca74
+EDGE thunk=0x45D63 mov r10d,75 -> parca75
+EDGE thunk=0x45D6C mov r10d,76 -> parca76
+EDGE thunk=0x45D75 mov r10d,77 -> parca77
+EDGE thunk=0x45D7E mov r10d,78 -> parca78
+EDGE thunk=0x45D87 mov r10d,79 -> parca79
+EDGE thunk=0x45D90 mov r10d,80 -> parca80
+EDGE thunk=0x45D99 mov r10d,0xFE -> cleanup
+WARN IAT'ye eklendi: kernel32!VirtualAlloc (.mpimp section)
+WARN IAT'ye eklendi: kernel32!VirtualFree (.mpimp section)
+WARN IAT'ye eklendi: kernel32!ExitProcess (.mpimp section)
+WARN V4 STREAM AKTIF: her cagride VirtualAlloc ile tek sayfa arena acilir, parcalar TEK TEK 32B'lik slot'a cozulur, WIPE-BEHIND oncekini siler; her an max 1 parca plaintext
+WARN G1 slot her cagride rastgele adrese duser; G2 CRC-8 parca butunlugunu denetler; G3 %25 decoy enjeksiyonu
+WARN ARENA-V3 kurali gecerli: ayni fonksiyonu ayni anda coklu thread'te cagirmayin (fallback yolu decrypt-once flagi kullanir); VirtualAlloc basarisizsa otomatik YERINDE stream'a duser (crash yok)
+# TOPLAM: 1 fonksiyon korundu, 0 atlandi, 0 kapsam-disi (MP_ONLY), 83 JMP, 0 yem blok

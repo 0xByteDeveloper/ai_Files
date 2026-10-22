@@ -1,0 +1,1 @@
+maze@0x45000 stub@0x45040 template=V4.2 dogrulandi

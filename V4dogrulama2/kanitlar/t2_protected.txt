@@ -1,0 +1,26 @@
+Wine cannot find the FreeType font library.  To enable Wine to
+use TrueType fonts please install a version of FreeType greater than
+or equal to 2.0.5.
+http://www.freetype.org
+Wine cannot find the FreeType font library.  To enable Wine to
+use TrueType fonts please install a version of FreeType greater than
+or equal to 2.0.5.
+http://www.freetype.org
+wine: Unhandled illegal instruction at address 00882593 (thread 0024), starting debugger...
+Can't attach process 0020: error 5
+Wine cannot find the FreeType font library.  To enable Wine to
+use TrueType fonts please install a version of FreeType greater than
+or equal to 2.0.5.
+http://www.freetype.org
+Wine cannot find the FreeType font library.  To enable Wine to
+use TrueType fonts please install a version of FreeType greater than
+or equal to 2.0.5.
+http://www.freetype.org
+00f0:err:vulkan:vulkan_init_once Failed to load libvulkan.so.1
+00f0:err:wgl:egl_init Failed to load libEGL.so.1: libEGL.so.1: cannot open shared object file: No such file or directory
+00f0:err:wgl:internal_context_create Failed to create internal root context with attrs {format 13 major -1 minor -1 flags 0 profile 0x1 no_error 0}
+00f0:err:winediag:nodrv_CreateWindow Application tried to create a window, but no driver could be loaded.
+00f0:err:winediag:nodrv_CreateWindow L"The explorer process failed to start."
+00f0:err:systray:initialize_systray Could not create tray window
+00e8:err:winediag:nodrv_CreateWindow Application tried to create a window, but no driver could be loaded.
+00e8:err:winediag:nodrv_CreateWindow L"Make sure that your display server is running and that its variables are set."

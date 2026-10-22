@@ -1,0 +1,9 @@
+=== OUTPUT ===
+Coded by DosX-dev (GitHub)
+USE ONLY ENGLISH KEYBOARD LAYOUT! (WASD)
+                                                                                                                                                                                                                                                                                                                                        
+=== API CAGRILARI ===
+GetConsoleScreenBufferInfox167, GetStdHandlex1, SetConsoleCursorInfox1, SetConsoleCursorPositionx2, SetConsoleScreenBufferSizex1, SetConsoleTextAttributex334, SetConsoleTitleAx1, SetConsoleWindowInfox1, Sleepx1, VirtualAllocx2, VirtualFreex1, _kbhitx1, _time64x1, memsetx1, printfx1222, randx2, sprintfx1, srandx1
+=== SONUC: exit=? error=emu bitti ama ExitProcess yok (rip=0x45005D) ===
+=== TRACE (son 40) ===
+
