@@ -1,0 +1,52 @@
+========================================================================
+KANIT_V4.9 — V4.9 x86 Stream Dogrulama Kanitlari (ozet)
+Ortam: wine32 (qemu-i386 + Kron4ek wine-11.20-x86), wine64 (Debian dwine)
+Encoder: mp_encoder_v49.exe (V4.9 motor kaynaklariyla taze derleme)
+========================================================================
+
+[K1] BUG-A relay kaniti (V4.8, V4.9-oncesi):
+  her cagrida: Call KERNEL32.VirtualFree(c3240487,00000000,00008000) retval=00000000
+  0xC3240487 = dispatcher son 4 bayti (87 04 24 C3) = arenaStack[-1] okumasi.
+  V4.9: VirtualFree(arena,0,8000) retval=1 -> slot sayfasi geri kazanilir.
+
+[K2] BUG-B unicorn kaniti (V4.8):
+  FAULT: mov dword ptr [0x7e8bf7], eax  (0x40603C'in bozulmus hali)
+  V4.9: slot ici 0x40603C'e yazim + dogru donus degeri.
+
+[K3] BUG-C unicorn kaniti (V4.8):
+  test al,1 (ZF=1) -> [dispatch] -> cmovne ALINDI (ZF=0) -> T(0)=0x4F87 YANLIS
+  V4.9 (lea esp): T(0)=0xF7B9AED5 = yerel gcc referansiyla BIREBIR.
+
+[K4] Oracle (wine32, exit kodlari = Target(a)&0xFF):
+  arg:      0      1     0x42
+  baseline: 213   137    136
+  m1:       213   137    136
+  m2:       213   137    136
+  (unicorn full-EAX: 0xF7B9AED5 / 0xF489 / 0x52C0 — ucu de birebir)
+
+[K5] 400-cagri leak/cokme testi (wine32 exit):
+  t32loop.exe      = 109   (baseline)
+  t32loop_m1.exe   = 109
+  t32loop_m2.exe   = 109
+  (V4.8'te ayni test 8. cagrida hint tukendigi icin SIGILL veriyordu)
+
+[K6] MazeGame32 (PE32, -nostdlib, autotest modu):
+  baseline : AUTOTEST OK score=30 frame=529 hwid=650945844 WON=1  exit=0
+  m1 (3 bolge: GameTick+AiPickDir+GenerateMaze): BIREBIR ayni cikti, exit=0
+  m2 (ayni 3 bolge, hardened):                   BIREBIR ayni cikti, exit=0
+  m2 determinizm 5x: 0 0 0 0 0
+
+[K7] metin2 replika mb86 (SendBattle@8: stdcall ret 8 + E8 cagrilari +
+    ABS string push (reloc) + ret 0008; ASLR'li derleme):
+  baseline : caller=39 bitis  exit=0
+  m1: ayni cikti  |  m2: ayni cikti  |  ip1: ayni  |  ip2: ayni
+
+[K8] x64 regresyon (wine64): deneme.exe m1 0x1158 auto / m2 0x1158 auto
+  cikti hash uclu birebir: ef64d262 (baseline=m1=m2), exit=0 x3
+
+[K9] FORCE_FB (fbFlag=1 patch'li exe, unicorn):
+  T(0)=0xF7B9AED5 birebir — fbStage edi-hedef + fbDec idempotans +
+  fb kind=2 fixup mekanizmasi dogrulandi.
+  NOT: ayni fb-flag exe wine32'de SIGILL veriyor (V4.10 takip maddesi;
+  normal arena yolu wine32'de tam kanitli).
+========================================================================

@@ -1,0 +1,14 @@
+OKUBENI_V4.9.txt icerigi:
+
+mp_encoder_v49.exe kullanimi:
+  mp_encoder_v49.exe <giris.exe> <cikis.exe> <m1|m2|ip1|ip2> <start> <end|auto>
+  mp_encoder_v49.exe <giris.exe> <cikis.exe> <m1|m2|ip1|ip2> FN <hint-adres>
+
+metin2 ornek:
+  mp_encoder_v49.exe deneme.exe deneme_koruma.exe m2 0x004D7610 0x004D766F
+
+V4.9 ozet: x86 stream motorunda 8 kok-neden duzeltmesi (BUG-A..H) —
+arena-stack off-by-one leak (metin2 ilk-hasar cokusunun kok-nedeni),
+kind=2 ABS alan bozulmasi, bayrak ezici add esp,8, fbStage pop-eax,
+fb idempotans + fb ABS fixup, NULL-base 9. sans, depth guard, reloc yazimi.
+Detay: Rapor_V4.9.md + KANIT_V4.9.txt
