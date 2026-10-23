@@ -1,0 +1,63 @@
+# mp_encoder — i4M MazeProtector EVRENSEL SIFRELEYICI (V4.6)
+## Kullanim (Windows x64 — dosya: motor/mp_encoder.exe)
+
+```
+mp_encoder.exe <giris.exe> <cikis.exe> <m1|m2|ip1|ip2> <start> <end|auto> [start2 end2 ...]
+mp_encoder.exe <giris.exe> <cikis.exe> <m1|m2|ip1|ip2> FN <fonksiyon-ici-adres>
+```
+
+## V4.6 NE DEGISTI (kullanici istegi: x2)
+- x86 (PE32) hedefte `m1` / `m2` ARTIK GERCEK V4method1_TekTek / V4method2_Stream
+  motoru ile kurulur. V4.5'teki "IP'ye yonlendirme" KALDIRILDI.
+- Neden V4.5'te yonlendirme yapilmisti: x86 stream motorunda 5 hata vardi
+  (veda ret-N atlamasi, disp yanlis-register yazimi, CRC len ezkisi, decoy
+  SIB, nodec off-by-one). HEPSI DUZELTILDI — Rapor_V4.6.md'ye bak.
+- Sonuc: V4method1_TekTek.zip ve V4method2_Stream.zip'in x64'te kanitlanan
+  AKTIF Motorlari artik x86'da da (wine32'de birebir test edildi) ayni
+  sekilde calisiyor.
+
+## Adres kurallari (Cheat Engine gelenegi)
+- CIPLAK sayi = HEX: `E7B9E`, `14A4`, `1523` (hepsi hex sayilir)
+- `0x` onekli = hex: `0xE7B9E`; decimal gerekirse `0d5284`
+- Adres `imgBase` ile `imgBase+imgSz` arasindaysa VA sayilir (modulBase+RVA),
+  daha kucukse RVA sayilir. Iki form da desteklenir.
+- `end=auto` : BFS fonksiyon-sonu bulucu (ret/disari-jmp siniri + talimat snap)
+- `FN <adres>`: adres fonksiyonun ICINDEYSE basini bilmen gerekmez (MSVC/
+  metin2 tarzi int3 duzeninde kesin; mingw+ud2 duzende guvenli-red).
+
+## Metotlar
+- `m1`  = V4method1 TekTek (stream, sabit slot)         — x64 VE x86
+- `m2`  = V4method2 Stream god-tier (G1 rastgele slot + G2 CRC + G3 decoy) — x64 VE x86
+- `ip1` = V4.3-IP yerinde (sabit anahtar)               — reloc-guvenli
+- `ip2` = V4.3-IP yerinde + her cagrida yeni rastgele anahtar (TAVSIYE)
+
+## Hangi metodu ne zaman?
+- Normal exe/oyun client (metin2client gibi): m1/m2 serbest; govdede mutlak
+  adres olsa da cikista ASLR kapali oldugu icin gecerli kalir.
+- Ayni base'i paylasan coklu DLL / relocate edilme ihtimali olan DLL: ip1/ip2
+  (IP motoru reloc-delta'yi ilk decrypt'te geri alir).
+- Anti-tamper en yuksek: m2 (G1 rastgele slot + G2 CRC-8 + G3 decoy).
+
+## Ornekler (metin2client deneme.exe uzerinden)
+```
+mp_encoder.exe deneme.exe korumali.exe m2 D7610 D766C
+mp_encoder.exe deneme.exe korumali.exe m1 0x004D7610 0x004D766C   (VA formu)
+mp_encoder.exe deneme.exe korumali.exe m2 FN E7B9E   (cagri-sitesinden butun fonksiyon)
+mp_encoder.exe deneme.exe korumali.exe ip2 D7610 auto
+```
+
+## Kurallar / Sinirlar (V4.6 itibariyla)
+1. Bolge TALIMAT sinirlarinda (motor snap eder; 16 bayt min).
+2. Govdede loop/jcxz (E0-E3), far jmp: desteklenmez (guvenli-red).
+3. Parcalar-arasi CALL (fonksiyon ici, parca sinirini asan call): guvenli-red.
+4. Fonksiyon son komutu ret/ret N/disari-jmp olmali.
+5. Cikti PE'sinde DYNAMICBASE+NX temizlenir; ASLR'li ayni-base coklu DLL'de IP kullan.
+6. Encoder x64 Windows'ta calisir; urettigi ciktilar hem x86 hem x64 olabilir.
+
+## wine32-metot-ve-skill.zip icerigi
+- motor/            : mp_encoder.exe V4.6 + tum kaynaklar
+- wine32-kit/       : skill (SKILL.md, method.md, setup-wine32.sh) — Linux'ta
+                      root'suz PE32 calistirma kits (qemu-i386 + Kron4ek wine x86)
+- testler/          : mb86_aslr.exe (metin2-benzeri), mt86.exe, ciktilar,
+                      KANIT_V4.6.txt, uni_maze86.py (duzeltilmis harness)
+- Rapor_V4.6.md     : 6 kok-neden + kanit tablosu

@@ -1,0 +1,73 @@
+# KANIT mp_encoder V4.6 — GERCEK RUNTIME (wine32/qemu + wine64 + unicorn)
+# Tarih: 2026-10-23
+# Encoder: motor/mp_encoder.exe (PE32+ x64, statik, capstone 5.0.9)
+# Duzeltmeler: veda ret[imm16] / [ebx] disp yazimi (89 83) / CRC len kaydi (ecx) /
+#              decoy SIB C3 (eax*8) / nodec off-by-one / crcFarewell arg sirasi /
+#              DISCARDABLE temizligi / uni_maze86 harness push sirasi
+
+## 0) Encoder V4.6 degisiklik ozeti
+- V4.5'teki "x86 m1/m2 -> IP yonlendirme" KALDIRILDI. x86 (PE32) hedefte m1/m2
+  ARTIK GERCEK V4.2-X86 stream motoru ile kurulur.
+- x1 sorusunun cevabi (kok-nedenler, 6 hata):
+  H1: EmitArenaFarewellX86 ret imm16'i ATTIYORDU (ciplak C3). stdcall/thiscall
+      (ret 8/ret 12) fonksiyonlarda cagiranin stack'i N bayt kayiyordu.
+      x64 motorunda zaten vardi (EmitArenaFarewell(retOp,retImm16)) — x86'ya
+      port edilmemisti. -> V4.6: ORIJINAL ret [imm16] korunur.
+  H2: Stub cleanup-prepatch 'mov [ebx+clDispPos],eax' yerine 89 86 (=[esi+..])
+      emit ediliyordu; rep movsb sonrasi esi=blob'daki template-sonu oldugundan
+      disp ARENA'ya YAZILMIYOR, E9 disp 0 kaliyordu -> cleanup 'jmp farewell'
+      stage'e geri donuyor (sonsuz dongu / segfault). -> 89 83 (ebx).
+  H3: Hardened CRC-8 dongusu len'i [esp+0xC]'den okuyordu; decrypt dongusu ayni
+      hucreyi 0'a indiriyordu -> 0xFFFFFFFF tur, slot-sonrasi arena-disi okuma
+      -> wine32 m2 SEGFAULT. -> len kaydi ecx'te tasinir (x64 edx kopyasi gibi).
+  H4: G3 decoy tablo okumasi SIB 0x03 (eax*1) — tablo girdisi 8B -> x64'teki
+      SIB 0xC3 (eax*8) duzeltmesi x86'ya port edilmemisti -> cop doff/dlen ->
+      slot'a cop -> wild execution. -> SIB C3.
+  H5: Decoy 'jne nodec' off-by-one: disp, disp-byte yerine SHR opcode'unun
+      uzerine yaziliyordu; gercek disp 0 kaliyordu (jne hemen-dusur) ->
+      decoy atlanmiyor. -> blob[jneNd] = nodec - (jneNd+1).
+  H6 (tani araci): uni_maze86.py cagri kurulumunda retaddr argumanlarin ALTINA
+      basiliyordu (yanlis siral) — V4.5'in "EAX bozuk" gozleminin bir parcasi
+      buydu. Duzeltildi; iz artik EAX=0xBBB8 TAM veriyor.
+  Ek: crcFarewell VirtualFree arg sirasi duzeltildi; DISCARDABLE section'a
+      yasan .maze artik discard-edilmez; BuildStreamX86 blobBytes raporlar.
+
+## A) mb86_aslr.exe — metin2client D7610 birebir vekili (x86/wine32)
+#   ASLR acik (DllChar 0x160), govdede reloc'lu ABS string push (E8'li),
+#   stdcall ret 8, ayri caller, mingw /nn long-name + discardable son section
+#   baseline: caller=39 / bitis / exit=0
+m1 0x1535 0x1584 => [OK-M1] 7 parca 14 site 8 thunk | runtime: caller=39 bitis exit=0
+m2 0x1535 0x1584 => [OK-M2] 7 parca 14 site 8 thunk | runtime: caller=39 bitis exit=0
+m2 0x401535 0x401584 (VA-form) => runtime: caller=39 bitis exit=0
+m2 5x tekrar calistirma (G1 rastgele slot): 5/5 caller=39 bitis exit=0
+ip2 0x1535 0x1584 (regresyon) => runtime: caller=39 bitis exit=0
+
+## B) mt86.exe — ret 12 stdcall + erken ret + dongu + cdecl caller (x86/wine32)
+#   Move3 (0x1510..0x1532): C2 0C 00 ile biter; iki donus yolu; E8 Helper cagrisi
+m1 0x1510 0x1532 => runtime: mt86-rezerve acc=342 exit=0   (baseline acc=342)
+m2 0x1510 0x1532 => runtime: mt86-rezerve acc=342 exit=0
+m2 0x1540 0x1581 (CallerC, cdecl ret C3, E8'li dongu) => acc=342 exit=0
+
+## C) x64 regresyon — deneme.exe (wine64)
+m2 0x14A4 0x150B => [OK-M2] | runtime: hash=5F2970E0 sink=1596551392 bitti
+m1 0x14A4 0x150B => [OK-M1] | runtime: hash=5F2970E0 sink=1596551392 bitti
+baseline hash=5F2970E0 — UCLU BIREBIR (V4.5 kanitiyla ayni deger)
+
+## D) unicorn izi (uni_maze86.py — harness push-sirasi duzeltildi)
+#   mb86_m1.exe, SendBattle(0x1111,0x2222) — beklenen EAX=0xBBB8:
+#   dispatch 0..3 -> ret-swap edx=0xFE -> clDispatch -> cleanup(push eax,
+#   freeBase, flag=1) -> jmp farewell(BLOB+0x4C9 — disp artik ARENA'ya dogru
+#   yaziliyor) -> VirtualFree -> add esp,0x20 -> pop eax -> RET 8 -> RET_MAGIC.
+#   SONUC: EAX = 0xbbb8 (beklenen 0xBBB8) TAM
+#   Farewell baytlari (m1 ve m2): 83 C4 20 58 C2 08 00 (ciplak C3 YOK)
+
+## E) T3 DLL (MiniGameDll, MM_Move ret 12) — sinir notu
+#   m1/m2 DLL'i TERCIH-EDILEN base'de yuklenince birebir calisir (MM_Move
+#   0x14D0 349B, 23 parca kuruldu). Ayni base'i paylasan coklu DLL'de loader
+#   DLL'i RELOC eder; stream govde-tasima reloc-delta'yi bilmedigi icin bu
+#   durumda ip1/ip2 (reloc-guvenli) kullanilmalidir. EXE'lerde sorun yok:
+#   EXE her zaman tercih-edilen base'de yuklenir (ASLR V4.6'da cikista kapali).
+
+## F) FN modu
+#   V4.5 mantigi ayni. MSVC/metin2 duzeni (saf int3 dolgu) icin kesin;
+#   mingw + ud2 dolgulu duzende GUVENLI-RED verir (cikti uretmez).
