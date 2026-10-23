@@ -1,0 +1,55 @@
+# mp_encoder — i4M MazeProtector EVRENSEL SIFRELEYICI (v4.4)
+## Kullanim (Windows x64 — dosya: motor/mp_encoder.exe)
+
+```
+mp_encoder.exe <giris.exe> <cikis.exe> <m1|m2|ip1|ip2> <start> <end|auto> [start2 end2 ...]
+```
+
+- `<start>/<end>`: 0xHEX veya decimal.
+  - Adres `imgBase` ile `imgBase+imgSz` arasindaysa VA sayilir (Cheat Engine'den
+    kopyaladigin "modulBase+RVA" degeri dogrudan verilir).
+  - Daha kucukse RVA sayilir (0x1158 gibi).
+- `end=auto` : BFS end-address bulucu — fonksiyonun sonunu kendisi bulur
+  (ret/disari-jmp sinirina kadar) ve talimat sinirina snap eder.
+- `m1`  = V4method1 TekTek (stream, sabit slot, wipe-behind)
+- `m2`  = V4method2 Stream god-tier (G1 rastgele slot + G2 CRC + G3 decoy)
+- `ip1` = V4.3-IP yerinde (sabit anahtar; govde .text'te sifreli, cagrida yerinde cozulur)
+- `ip2` = V4.3-IP yerinde + her cagrida YENI rastgele anahtar (tavsiye edilen)
+
+Cikis: korumali exe + `<cikis>_MazeMap.txt` (RVA haritasi — Cheat Engine'de
+modulBase+RVA ile hangi bolgenin korundugunu gosterir).
+
+## Ornekler
+```
+mp_encoder.exe oyun.exe oyun_koruma.exe m2 0x140001158 0x140001410
+mp_encoder.exe oyun.exe oyun_koruma.exe ip2 0x1158 auto
+mp_encoder.exe oyun.exe oyun_koruma.exe m1 0x1400018D9 0x140001C74 0x140001C74 0x140001E46
+```
+
+## Kurallar / Sinirlar
+1. Korunacak bolge TALIMAT sinirlarinda baslamali (motor snap eder; pdata/sembol
+   dogrularsa en dogrusu odur — yanlis start'ta geri-snap uyarisi verir).
+2. Fonksiyonun ORTASINA disaridan atlama (switch/vtable) varsa motor REDDEDER
+   (guvenli-red: cokme degil, uyari). Girise gelenler (normal call) sorun degil.
+3. Ayni dosyaya ikinci kez koruma UYGULAMA — daima orijinalden basla.
+4. Coklu bolge desteklenir (V4.4: her bolge taze yukleme + benzersiz arena hint).
+5. EXE + DLL desteklenir (DLL'de base-cakismasi yolunda V4.3.1 reloc-TAM devrede).
+
+## Bu surumde duzeltilen hatalar (V4.4)
+- BUG-A: SnapRange verilen start'i geriye kaydirabiliyordu -> onceki fonksiyonun
+  son `ret`'i korunan bolgeye giriyordu ve CRT'nin `call main`'i "ortaya gelen
+  dis referans" sanilip reddediliyordu. Artik once ileri-yuruyus denenir.
+- BUG-B: Coklu korumada arena hint'i (imgBase+imgSz) HER machinery icin ayni
+  oluyordu -> 2. machinery'nin VirtualAlloc'u 1.'nin arenasina cakiliyor,
+  fallback dongusu 0x400202 argumaniyla sonsuza donuyordu. Hint artik
+  mazeRva'den turetilen benzersiz 64K ofsetli.
+
+## Dogrulama (GERCEK wine64, emulasyon degil) — Encoder_Test/
+| Hedef dosya            | Yontem | Bolge          | Sonuc |
+|------------------------|--------|----------------|-------|
+| TinySnake_my.x64       | m1     | GameLoop       | CANLI (oyun cizildi, cokme yok) |
+| TinySnake_my.x64       | m2     | GameLoop       | CANLI |
+| TinySnake_my.x64       | m1     | Move(logic)    | CANLI |
+| TinySnake_my.x64       | m1     | GameLoop+Move  | CANLI (V4.4-fix ile) |
+| TinySnake_my.x64       | m2     | GameLoop+Move  | CANLI (V4.4-fix ile) |
+| TinySnake_my.x64       | ip1    | GameLoop       | CANLI |

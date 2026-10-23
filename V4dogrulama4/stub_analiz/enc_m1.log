@@ -1,0 +1,17 @@
+PE yuklendi: imgBase=0x140000000 imgSz=0x80000 arch=x64 section=18
+  start: 0x1C74 = RVA
+  end: 0x1E46 = RVA
+  INSTRUCTION-AYRACI: start=0x1C74 aligned=EVET (ileri yuruyus TAM) end=0x1E46 -> snapped=0x1E46 (son ret=0x1E46, fark=0 bayt)
+[bs-in] BuildStream fnRva=0x1C74 fnSize=466 (u32 fnRva+fnSize=0x1E46)
+[last] fnRva=0x1C74 fnSize=466 last.rva=0x1E45 mn=ret kind=0 isRet=1 tgt=0x0 join=0
+  [OK-M1] Bolge_1_0x1C74 RVA 0x01C74 +466 bayt -> .maze 0x81000 blob=3284B parca=28 site=67 thunk=29 entry=0x813F4
+         ! IAT'ye eklendi: kernel32!VirtualAlloc (.mpimp section)
+         ! IAT'ye eklendi: kernel32!VirtualFree (.mpimp section)
+         ! IAT'ye eklendi: kernel32!ExitProcess (.mpimp section)
+         ! V4 STREAM AKTIF: her cagride VirtualAlloc ile tek sayfa arena acilir, parcalar TEK TEK 32B'lik slot'a cozulur, WIPE-BEHIND oncekini siler; her an max 1 parca plaintext
+         ! ARENA-V3 kurali gecerli: ayni fonksiyonu ayni anda coklu thread'te cagirmayin (fallback yolu decrypt-once flagi kullanir); VirtualAlloc basarisizsa otomatik YERINDE stream'a duser (crash yok)
+[RELOC-WRITER] off=0xA800 cap=0x70 wr=0x70 girdi=47 head=0
+
+=== SONUC (m1): 1 bolge korundu, 0 atlandi ===
+Cikis: TinySnake_my.protected.m1.exe
+Harita: TinySnake_my.protected.m1.exe_MazeMap.txt

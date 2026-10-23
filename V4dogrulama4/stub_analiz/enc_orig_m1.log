@@ -1,0 +1,16 @@
+PE yuklendi: imgBase=0x400000 imgSz=0x44000 arch=x64 section=3
+  start: 0x1158 = RVA
+  end: 0x1410 = RVA
+  INSTRUCTION-AYRACI: start=0x1158 aligned=EVET (ileri yuruyus TAM) end=0x1410 -> snapped=0x1410 (son ret=0x1410, fark=0 bayt)
+[bs-in] BuildStream fnRva=0x1158 fnSize=696 (u32 fnRva+fnSize=0x1410)
+[last] fnRva=0x1158 fnSize=696 last.rva=0x140F mn=ret kind=0 isRet=1 tgt=0x0 join=0
+  [OK-M1] Bolge_1_0x1158 RVA 0x01158 +696 bayt -> .maze 0x45000 blob=4900B parca=50 site=117 thunk=51 entry=0x454A4
+         ! IAT'ye eklendi: kernel32!VirtualAlloc (.mpimp section)
+         ! IAT'ye eklendi: kernel32!VirtualFree (.mpimp section)
+         ! IAT'ye eklendi: kernel32!ExitProcess (.mpimp section)
+         ! V4 STREAM AKTIF: her cagride VirtualAlloc ile tek sayfa arena acilir, parcalar TEK TEK 32B'lik slot'a cozulur, WIPE-BEHIND oncekini siler; her an max 1 parca plaintext
+         ! ARENA-V3 kurali gecerli: ayni fonksiyonu ayni anda coklu thread'te cagirmayin (fallback yolu decrypt-once flagi kullanir); VirtualAlloc basarisizsa otomatik YERINDE stream'a duser (crash yok)
+
+=== SONUC (m1): 1 bolge korundu, 0 atlandi ===
+Cikis: orig64.m1.exe
+Harita: orig64.m1.exe_MazeMap.txt
