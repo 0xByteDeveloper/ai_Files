@@ -1,0 +1,81 @@
+# mp_encoder — i4M MazeProtector EVRENSEL SIFRELEYICI (V4.5)
+## Kullanim (Windows x64 — dosya: motor/mp_encoder.exe)
+
+```
+mp_encoder.exe <giris.exe> <cikis.exe> <m1|m2|ip1|ip2> <start> <end|auto> [start2 end2 ...]
+mp_encoder.exe <giris.exe> <cikis.exe> <m1|m2|ip1|ip2> FN <fonksiyon-ici-adres>
+```
+
+## Adres kurallari (V4.5 — Cheat Engine gelenegi)
+- CIPLAK sayi = HEX: `E7B9E`, `14A4`, `1523` (hepsi hex sayilir)
+- `0x` onekli = hex: `0xE7B9E`; decimal gerekirse `0d5284`
+- Adres `imgBase` ile `imgBase+imgSz` arasindaysa VA sayilir (modulBase+RVA degeri
+  dogrudan verilir), daha kucukse RVA sayilir.
+- `end=auto` : BFS fonksiyon-sonu bulucu (ret/disari-jmp siniri + talimat snap)
+- `FN <adres>`: adres FONKSIYONUN ICINDEYSE basini bilmen gerekmez — geriye dogru
+  int3 (0xCC) dolgu sinirini arar, butun fonksiyonu bastan sona korur (MSVC/
+  metin2 tarzi duzende kesin; dolgusuz duzende guvenli-red verir, manuel ver).
+
+## Metotlar
+- `m1`  = V4method1 (x64'te stream; x86'da otomatik ip1'e yonlenir*)
+- `m2`  = V4method2 god-tier (x64'te stream; x86'da otomatik ip2'ye yonlenir*)
+- `ip1` = V4.3-IP yerinde (sabit anahtar; govde .text'te sifreli)
+- `ip2` = V4.3-IP yerinde + her cagrida YENI rastgele anahtar (TAVSIYE)
+
+(*) V4.5 x86 (PE32) karari: V4.2-X86 stream motorunun runtime yolu kararsizdir
+(unicorn izinde sonuc-EAX bozuk, wine32'de m1 dhangi/m2 segfault). Kullanicinin
+"ASLA cokmesin" istegi icin x86 hedefte m1/m2 istegi KANITLI V4.3-IP motoruna
+yonlendirilir: m1->ip1, m2->ip2. Encoder bunu ACIKCA yazar. x64'te m1/m2 gercek
+stream olarak kurulur.
+
+## ASLR / RELOC (V4.5 — metin2client senaryosu)
+Govdede mutlak adres (reloc'lu VA; ornegin `push "hata mesaji"`) varsa:
+- m1/m2 (x64): cikis PE'sinde DYNAMICBASE temizlenir (ASLR kapanir). Image
+  tercih-edilen base'de yuklenir; mutlak adresler gecerli kalir; loader sifreli
+  bolgeye dokunmaz. UYARI satiri basilir.
+- ip1/ip2: dokunulmaz — IP motoru reloc-guvenlidir (loader sifreli govdeye
+  delta yazsa bile ilk decrypt'te geri alir; T3 DLL relocated-base kaniti).
+
+## Ornekler (metin2client uzerinden)
+```
+mp_encoder.exe deneme.exe korumali.exe m2 0xD7610 0xD766C
+mp_encoder.exe deneme.exe korumali.exe m2 D7610 D766C
+mp_encoder.exe deneme.exe korumali.exe m2 FN E7B9E        (cagri-sitesi icinden butun fonksiyon)
+mp_encoder.exe deneme.exe korumali.exe ip2 D7610 auto
+```
+NOT: FN ile birlesik 2 fonksiyonlu bolge bulursa (aralarinda dolgu yoksa)
+GUVENLI-RED yapar — manuel start/end ver.
+
+## Kurallar / Sinirlar (V4.5 itibariyla)
+1. Korunacak bolge TALIMAT sinirlarinda baslamali (motor snap eder).
+2. x64 + m1/m2 (stream): govde icindeki E8 cagrilari REDDEDILIR (slot gecici;
+   donus adresi yasamaz) — ip1/ip2 kullan. x86'da IP zaten her cagriyi destekler.
+3. x64 + ip1/ip2 + govde-E8 kombinasyonu SINIRLI dogrulandi: encoder UYARI basar,
+   ciktiyi baseline ile karsilastir (x86'da bu kombinasyon testli ve saglam).
+4. FN bolgesi icinde 2+ byte'lik int3 dolgu bulunursa guvenli-red (iki fonksiyon
+   birlesmis demektir).
+5. Ayni dosyaya ikinci kez koruma UYGULAMA — daima orijinalden basla.
+6. Coklu bolge desteklenir (her bolge taze yukleme + benzersiz arena hint).
+7. EXE + DLL desteklenir; DLL'de base-cakismasi yolu V4.3.1 reloc-TAM ile kanitli.
+
+## V4.5'te duzeltilen / degisen
+- BUG-C: "0x" siz giris base-0 parse ile SESSIZCE decimal sayiliyordu ("1523" ->
+  0x5F3!). Artik ciplak sayi DAIMA hex (CE gelenegi); decimal icin "0d" oneki.
+- BUG-D: x86 stream motoru runtime-kararsizligi -> x86'da IP'ye otomatik
+  yonlendirme (yukarida).
+- BUG-E: m1/m2 govdesinde reloc'lu mutlak adres varsa KATI red -> ASLR temiz
+  cikisla desteklenir (metin2client'taki `push "Send Battle Attack Packet Error"`
+  engeli boylece kalkti).
+- YENI: FN modu (fonksiyon-basi bulucu) + guvenli-red.
+- YENI: hata mesajlari artik GERCEK hex yazar (eski "reloc RVA 0x882252" gorunumu
+  decimal to_string karisimiydi; gercek deger 0xD764C idi).
+
+## Dogrulama ozeti (GERCEK wine64/wine32, emulasyon kaniti degil)
+| Hedef | Metot | Sonuc |
+|-------|-------|-------|
+| mb86_aslr.exe x86 (ASLR+reloc'lu govde, ret 8, cagiran var) | m1/m2/ip1/ip2 | 4/4 korundu, runtime BIREBIR (caller=39 bitis, exit 0) |
+| mb86_aslr.exe x86 | m2 VA-form 401535 | korundu, runtime BIREBIR |
+| deneme.exe x64 | m2 / ip1(bare-hex+auto) / ip2 | 3/3, hash=5F2970E0 BIREBIR |
+| x64rel.exe x64 (govde ABS+reloc, E8'li) | ip2 | korundu; E8 UYARISI basildi |
+| x64rel.exe x64 (E8'li) | m1/m2 | GUVENLI-RED (tasarim geregi, ip kullan) |
+| msvc-duzeni FN (hint fonksiyon ortasi) | m2 FN | bas+son dogru bulundu; birlesik bolgede GUVENLI-RED |

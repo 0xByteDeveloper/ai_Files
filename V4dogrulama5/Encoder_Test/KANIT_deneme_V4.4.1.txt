@@ -1,0 +1,55 @@
+# mp_encoder V4.4.1 — deneme.exe CANLI KANIT (gercek wine64, emulasyon degil)
+# Tarih: 2026-10-23
+
+## Demo programi
+deneme.c → deneme.exe (mingw x64, -O0 -g, standart CRT, SEH'li, 18 section)
+- SecretHash(uint32_t x, uint32_t rounds)  RVA 0x14A4 (register ARGUMANLI!)
+- main()  RVA 0x150B  (SecretHash'i 40 kez cagirir, XOR akumulatoru basar)
+- baseline cikti : hash=5F2970E0 sink=1596551392  exit=0
+
+## Kullanicinin soruldugu komut sozdizimi (birebir)
+mp_encoder.exe deneme.exe denemeoutput.exe m2 0x14A4 0x150B
+→ 1 bolge korundu / denemeoutput.exe CALISTI: hash=5F2970E0 exit=0
+
+## V4.4.1 matrisi (hepsi GERCEK wine64, exit=0 + hash birebir)
+| Yontem | Bolge                          | Sonuc              |
+|--------|--------------------------------|--------------------|
+| m2     | SecretHash (explicit end)      | hash=5F2970E0 OK   |
+| m2     | SecretHash (end=auto)          | hash=5F2970E0 OK   |
+| m2     | main+SecretHash (2 bolge)      | hash=5F2970E0 OK   |
+| ip1    | SecretHash (explicit end)      | hash=5F2970E0 OK   |
+| ip1    | SecretHash (end=auto)          | hash=5F2970E0 OK   |
+| ip2    | SecretHash (40 cagri, yeni anahtar) | hash=5F2970E0 OK |
+| ip2    | main+SecretHash IC-ICE 2 makine | hash=5F2970E0 OK |
+| ip1    | bare-hex girisi (14A4 auto)    | OK                 |
+| m1     | TinySnake GameMain             | oyun canli, cokme yok |
+
+## Unicorn (komut-komut) kaniti — arguman korumasi
+IP1 makinesi uzerinden SecretHash(0x1234567, 8):
+- donus rax=0xE6D0654C
+- yerli GCC ayni fonksiyon: 0xE6D0654C  → BIREBIR
+- govde: cozuldu → calisti → YERINDE yeniden sifrelendi (body_before==body_after)
+- toplam 3125 komut (delti eski kodda 400K+ sonsuz dongu)
+
+## V4.4.1'de bulunan ve duzeltilen 3 kok-hata (Motor_V4.3_IP.h x64 emitter)
+1. push listesinde RAX EKSIKTI: yorum "push rcx,rdx,r8,r9,rax,rsi,rdi" (7)
+   diyordu ama baytlar "51 52 41 50 41 51 56 57" = 6 push uretiyordu.
+   Epilogue 7 pop oldugu icin: fazladan pop cagiranin donus adresini RCX'e
+   aliyordu -> register-argumanli fonksiyonlara COP arguman gidiyordu;
+   rsp +8 kayiyordu; ret-replacement yanlis slot'a yaziyordu; ret-stub
+   devre disi kaliyordu; cagiranin shadow-slot'u eziliyordu.
+   FIX: push rax (50) eklendi -> 7 push / 7 pop dengeli.
+2. Ret-stub side-fetch REX hatali: "4B 8B 54 CA F8" = mov rdx,[r10+r9*8-8]
+   (indeks R9 = govde artigi COP!). Yorum mov r10,[r10+rcx*8-8] istiyordu.
+   FIX: 4B -> 4D (REX.X=1). Artik realRet dogru slot'tan okunuyor.
+3. mp_encoder.cpp ComputeFnSizeCFG: maxEnd ZATEN relative iken mem.base bir
+   DAHA dusuluyordu -> end=auto hep 0xC000150B gibi cop donduruyor, bolge
+   "cok buyuk" deyip atlanıyordu. FIX: dogrudan maxEnd kullan.
+   EK: bare-hex girisi ("14A4") strtoull(,,0) ile 14'e dusuyordu -> ParseAddr
+   (kismi parse'ta hex tamamla). EK: 0 bolge korunduysa cikis dosyasi yazma.
+
+## Neden daha once yakalanmadi?
+T1/TinySnake/MiniGameDll IP testlerinde korunan fonksiyonlar ya VOID'du
+(register-arguman yok) ya da test penceresinde ret-stub yolu hic calismadi
+(oyun dongusu icindeyken kill edildi). deneme.exe = ilk REGISTER-ARGUMANLI +
+donus-degerli + cok-cagrilI test -> hatayi aciga cikardi.

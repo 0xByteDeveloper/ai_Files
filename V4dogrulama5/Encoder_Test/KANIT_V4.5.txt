@@ -1,0 +1,29 @@
+# mp_encoder V4.5 — GERCEK RUNTIME KANITLARI (wine64 + wine32/qemu + unicorn)
+# Tarih: 2026-10-23
+
+## A) x86 metin2-benzeri sentetik (mb86_aslr.exe)
+#   ASLR acik (DllChar 0x160), govdede 2 reloc'lu ABS adres, stdcall ret 8,
+#   fonksiyonu cagiran ayri caller — metin2client D7610 senaryosunun birebir kopyasi
+#   baseline: caller=39 / bitis / exit=0
+m1 0x1535 0x1584 => === SONUC (m1): 1 bolge korundu, 0 atlandi === | runtime: [caller=39 bitis ] exit=0
+m2 0x1535 0x1584 => === SONUC (m2): 1 bolge korundu, 0 atlandi === | runtime: [caller=39 bitis ] exit=0
+ip1 0x1535 0x1584 => === SONUC (ip1): 1 bolge korundu, 0 atlandi === | runtime: [caller=39 bitis ] exit=0
+ip2 0x1535 0x1584 => === SONUC (ip2): 1 bolge korundu, 0 atlandi === | runtime: [caller=39 bitis ] exit=0
+m2 401535 401584 => === SONUC (m2): 1 bolge korundu, 0 atlandi === | runtime: [caller=39 bitis ] exit=0
+
+## B) x64 deneme.exe (baseline hash=5F2970E0 sink=1596551392)
+m2 0x14A4 0x150B => === SONUC (m2): 1 bolge korundu, 0 atlandi === | runtime: [hash=5F2970E0 sink=1596551392 bitti]
+ip1 14A4 auto => === SONUC (ip1): 1 bolge korundu, 0 atlandi === | runtime: [hash=5F2970E0 sink=1596551392 bitti]
+ip2 0x14A4 0x150B => === SONUC (ip2): 1 bolge korundu, 0 atlandi === | runtime: [hash=5F2970E0 sink=1596551392 bitti]
+
+## C) FN modu + guvenli-red
+#   FN: int3-dolgu sonu 0x1532 -> fonksiyon basi 0x1533 (MSVC duzeni)
+#   FN -> fonksiyon RVA 0x1533 .. 0x1612 (boyut=223 bayt)
+# HATA: FN bolgesi fonksiyonlar-arasi dolgu (int3) iceriyor - iki fonksiyon birlesti. Manuel start/end ver.
+# - hint fonksiyon ortasindan: bas+son bulundu, ip2 kuruldu
+# - birlesik-bolge durumunda: 'HATA: FN bolgesi fonksiyonlar-arasi dolgu...'
+#   (cokme riski tasiyan cikti URETILMEZ)
+
+## D) unicorn x86 izi (uni_maze86.py) — V4.2-X86 stream motoru teshisi
+#   dispatch 0..3 + farewell calisir AMA EAX donus degeri veda hattinda bozuluyor;
+#   wine32: m1 hang / m2 segfault (6/6 deterministik) -> x86'da IP'ye yonlendirme karari
