@@ -1,0 +1,70 @@
+========================================================================
+KANIT_V4.10 — Gerçek metin2 fonksiyonu: sifreleme + calisma-anu kanitlari
+Ortam : wine32 (qemu-i386 + Kron4ek wine-11.20-x86), wine64 (Debian dwine)
+Encoder: mp_encoder_v410_32.exe (test) / mp_encoder_v410.exe (x64, ayni kaynak)
+Hedef : deneme.exe (metin2client) RVA 0xD7610 +95 — Send Battle Attack Packet
+Komut : mp_encoder_v410.exe deneme.exe denemeoutput.exe m2 0x004D7610 0x004D766F
+========================================================================
+
+[K1] KULLANICI KOMUTU ARTIK SIFRELIYOR (v49 RED -> v410 OK-M2)
+  v49 : [HATA] Bolge_1_0xD7610 RVA 0xD7610 +95: esp yazimi takipsiz form (RVA 0xD7611)
+  v410: [OK-M2] Bolge_1_0xD7610 RVA 0xD7610 +95 bayt -> .maze 0x543000
+        blob=2217B parca=7 site=14 thunk=8 entry=0x5434EE
+        + IAT: VirtualAlloc/VirtualFree (.mpimp) + ABS-site RVA-form+fixup
+        + .reloc yerinde yeniden insa + ASLR kapali
+  Kok-neden: V4.7 ESP-izleyicisi 8B EC (mov ebp,esp) komutunu "esp yazimi" sanmis
+  (8B'de rm=KAYNAK); 8B E5 (mov esp,ebp) taninmiyordu. Gercek metin2 prologu 8B EC,
+  uc cikis yolu 8B E5. mb86 vekili 89-formlari kullandigi icin v49'da geciyordu.
+
+[K2] YENIDEN INSA DOGRULAMASI (orijinal deneme.exe sandbox'ta yoktu)
+  - V4.6 blob'u decrypt: 7 parca, 13/13 site, 4 E8 hedefi slot-displerinden
+    geri cozuldu -> 95 baytlik govde BAYT-BAYT kuruldu (jne'ler 75 xx kisa form,
+    ret-swap E9 -> C2 08 00)
+  - .reloc: 0xD764C HIGHLOW girisi korundu (orijinal ASLR'li) - Kanit
+  - importDir orijinal .rdata tablosu .rdata'da bulundu (RVA 0x4497C8,
+    V4.6 .mpimp kopyasiyla birebir eslesti) -> dir[1] geri yazildi
+  - v49, deneme_orig.exe uzerinde kullanicinin hatasini HARFIYEN uretti
+
+[K3] GERCEK FONKSIYON RELAY TESTI (wine32, EP-stub thiscall D7610, E8 cagrilari
+     stub'li, TLS callback'leri etkisiz, baseline = ayni dosyada govde orijinale
+     geri yazilmis hal):
+  varyant A (al==0 -> erken cikis mov al,1/ret 8) : baseline=1  m2=1   BIREBIR
+  varyant B (cagri-2 basarisiz -> hata yolu: push "Send Battle..." (ABS site
+            kind=2 fixup) + TraceError + xor al,al) : baseline=0  m2=0   BIREBIR
+  varyant C (cagri-2 basarili -> 152520 -> al=1)   : baseline=1  m2=1   BIREBIR
+  varyant D (al=0 donusu)                          : baseline=0  m2=0   BIREBIR
+  (movzx eax,al ile deterministik cikis; 3 cikis yolu + 4 E8 + ABS push hepsi
+   calisiyor)
+
+[K4] 400-CAGRI SIZINTI TESTI (orijinal metin2 cokus mekanizi: BUG-A her cagri
+     1 arena sayfasi sizdiriyordu -> 8 cagri ≈ 0.13 sn'de cokus)
+  m2_L  (dongu, cagri-basi args, sonuc 0x2A) : exit=42
+  m2_L2 (kalan-sayac cikisi)                 : kalan=0 -> 400/400 cagri TAM
+  5x determinizm: 42 42 42 42 42
+  baseline_L2: kalan=0 (kontrol)
+  -> Arena VirtualAlloc/VirtualFree dengesi saglam, hint tukenesi YOK
+
+[K5] BLOB STATIK DOGRULAMA (v410 denemeoutput.exe)
+  7/7 parca CRC-8 plaintext uzerinde ESLESIYOR
+  Parca semantigi orijinal 95 bayt ile birebir (pid0..pid6 akisi)
+
+[K6] G2 ANTI-PATCH (fail-closed)
+  .maze sifreli slot bayti cevirildi -> exit=29 (SIGILL, parca calistirilmadi)
+  temiz dosya                        -> exit=1 (normal akis)
+
+[K7] REGRESYON (hepsi v410 encoder ile YENIDEN sifrelendi)
+  mb86_aslr  m2 0x401535 0x401584 : caller=39 bitis, exit=0  = baseline BIREBIR
+  t32one     m2 0x401500 auto     : exit=213 = 213           BIREBIR
+  t32loop    m2 0x4014F0 auto     : exit=109 = 109 (400 cagri) BIREBIR
+  MazeGame32 m2 3-bolge (GameTick 0x1A40 + AiPickDir 0x1720 + GenerateMaze 0x1180):
+             AUTOTEST OK score=30 frame=529 hwid=650945844 WON=1 = baseline BIREBIR
+
+[K8] EBX KORUNUMU SONDAJI (m2_B2 / base_B2)
+  ebx=0x77 yaz -> 1 cagri -> movzx eax,bl -> exit: ikisi de 119
+  -> stream makinesi cagri-arasi EBX'i bozmuyor (dongu testlerinin on kosulu)
+
+========================================================================
+SONUC: Kullanicinin tam komutuyla gercek metin2 client fonksiyonu V4.10 ile
+sifreleniyor; sifreli fonksiyonun 3 cikis yolu, ABS string push'u ve 4 cagri
+sitesi wine32 gercek-runtime'da baseline ile birebir; 400 cagri sizintisiz.
+========================================================================
